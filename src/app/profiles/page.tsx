@@ -13,8 +13,8 @@ const profiles = [
 
 export default function ProfilesPage() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-[#8E44AD] to-[#3498DB] p-4">
-      <div className="w-full max-w-sm rounded-3xl bg-white/10 p-6 shadow-lg backdrop-blur-xl">
+    <div className="min-h-screen w-full bg-gradient-to-b from-[#8E44AD] to-[#3498DB] md:flex md:items-center md:justify-center md:p-4">
+      <div className="flex h-screen w-full flex-col justify-between p-6 text-white md:h-auto md:max-w-sm md:rounded-3xl md:justify-start md:bg-white/10 md:shadow-lg md:backdrop-blur-xl">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 text-purple-900">
@@ -34,7 +34,7 @@ export default function ProfilesPage() {
           </Button>
         </header>
 
-        <main className="my-16 text-center text-white">
+        <main className="flex flex-1 flex-col items-center justify-center text-center md:my-16 md:flex-none">
           <h2 className="text-4xl font-extrabold">Who is watching?</h2>
           <p className="mt-2 text-white/80">
             Pick your profile to start exploring fun videos!
