@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const profiles = [
   {
@@ -14,8 +12,6 @@ const profiles = [
 ];
 
 export default function ProfilesPage() {
-  const profileImage = PlaceHolderImages.find((p) => p.id === profiles[0].avatar);
-
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-[#8E44AD] to-[#3498DB] p-4">
       <div className="w-full max-w-sm rounded-3xl bg-white/10 p-6 shadow-lg backdrop-blur-xl">
@@ -47,18 +43,9 @@ export default function ProfilesPage() {
             {profiles.map((profile) => (
               <Link href="/feed" key={profile.id} className="group text-center">
                 <div className="relative">
-                  <Avatar className="h-32 w-32 border-4 border-white transition-transform group-hover:scale-105">
-                    {profileImage && (
-                      <AvatarImage
-                        src={profileImage.imageUrl}
-                        alt={profile.name}
-                        data-ai-hint={profileImage.imageHint}
-                      />
-                    )}
-                    <AvatarFallback className="bg-gray-700 text-white">
-                      {profile.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-transparent transition-transform group-hover:scale-105">
+                    <User className="h-16 w-16 text-white" />
+                  </div>
                   <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 px-3 py-1 text-sm font-bold text-purple-900">
                     Age {profile.age}
                   </div>

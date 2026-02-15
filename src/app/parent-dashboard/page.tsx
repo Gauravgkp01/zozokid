@@ -8,7 +8,6 @@ import {
   Clock,
   TrendingUp,
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const ZoZoKidLogo = () => (
   <svg
@@ -39,10 +37,6 @@ const ZoZoKidLogo = () => (
 );
 
 export default function ParentDashboardPage() {
-  const pippoProfileImage = PlaceHolderImages.find(
-    (p) => p.id === 'profile-pippo'
-  );
-
   return (
     <div className="min-h-screen bg-background font-body">
       <header className="flex items-center justify-between bg-card p-4 shadow-sm">
@@ -135,16 +129,6 @@ export default function ParentDashboardPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-14 w-14">
-                    {pippoProfileImage && (
-                      <AvatarImage
-                        src={pippoProfileImage.imageUrl}
-                        alt="Pippo"
-                        data-ai-hint={pippoProfileImage.imageHint}
-                      />
-                    )}
-                    <AvatarFallback>P</AvatarFallback>
-                  </Avatar>
                   <div>
                     <p className="font-bold">Pippo</p>
                     <p className="text-sm text-muted-foreground">Age: 4</p>

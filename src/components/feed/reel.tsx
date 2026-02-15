@@ -6,7 +6,6 @@ import {
   Send,
   Repeat,
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '../ui/button';
 
@@ -40,14 +39,6 @@ export function Reel({ video }: { video: Video }) {
       {/* Bottom Info */}
       <div className="absolute bottom-4 left-4 right-4 text-white">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border-2 border-white">
-            <AvatarImage
-              src={`https://picsum.photos/seed/${video.id}/40/40`}
-            />
-            <AvatarFallback>
-              {video.channel.charAt(1).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
           <p className="font-bold">{video.channel}</p>
           <Button
             size="sm"
@@ -90,16 +81,6 @@ export function Reel({ video }: { video: Video }) {
             <Repeat className="h-6 w-6" />
           </div>
           <span className="text-xs font-bold">Remix</span>
-        </button>
-        <button className="mt-2 transition-transform active:scale-95">
-          <Avatar className="h-10 w-10 border-2 border-white">
-            <AvatarImage
-              src={`https://picsum.photos/seed/${video.id}c/40/40`}
-            />
-            <AvatarFallback>
-              {video.channel.charAt(1).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
         </button>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Home, User, Settings, PanelLeft } from 'lucide-react';
+import { Home, User, PanelLeft } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +12,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { AppSidebar } from '@/components/app-sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const userAvatar = PlaceHolderImages.find((p) => p.id === 'avatar-parent');
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <AppSidebar />
@@ -57,16 +53,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 size="icon"
                 className="overflow-hidden rounded-full"
               >
-                <Avatar>
-                  {userAvatar && (
-                    <AvatarImage
-                      src={userAvatar.imageUrl}
-                      alt="User avatar"
-                      data-ai-hint={userAvatar.imageHint}
-                    />
-                  )}
-                  <AvatarFallback>P</AvatarFallback>
-                </Avatar>
+                <User className="h-5 w-5" />
+                <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
