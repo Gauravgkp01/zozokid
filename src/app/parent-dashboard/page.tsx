@@ -154,8 +154,9 @@ export default function ParentDashboardPage() {
                   <Button
                     style={{ backgroundColor: '#FF4081' }}
                     className="rounded-full px-5 text-white hover:bg-[#FF4081]/90"
+                    asChild
                   >
-                    Watch
+                    <Link href="/feed">Watch</Link>
                   </Button>
                   <Button
                     variant="outline"
