@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Lock, User, Loader2 } from 'lucide-react';
+import { Lock, User, Loader2, School } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
 import { collection, doc, getDoc } from 'firebase/firestore';
@@ -116,7 +116,7 @@ export default function ProfilesPage() {
           </div>
         </main>
 
-        <footer className="text-center">
+        <footer className="text-center space-y-2">
           <Button
             variant="ghost"
             className="w-full rounded-full bg-white/20 hover:bg-white/30"
@@ -127,10 +127,18 @@ export default function ProfilesPage() {
               Manage Profiles in Parent Mode
             </Link>
           </Button>
+          <Button
+            variant="ghost"
+            className="w-full rounded-full bg-white/20 hover:bg-white/30"
+            asChild
+          >
+            <Link href="/teacher/login">
+              <School className="mr-2 h-4 w-4" />
+              Teacher Login
+            </Link>
+          </Button>
         </footer>
       </div>
     </div>
   );
 }
-
-    
