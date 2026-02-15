@@ -50,12 +50,17 @@ export default async function FeedPage() {
   ];
 
   return (
-    <div className="flex h-screen items-center justify-center bg-black">
-      <div className="relative h-full w-full max-w-sm snap-y snap-mandatory overflow-y-auto rounded-lg">
-        {videos.map((video) => (
-          <Reel key={video.id} video={video} />
-        ))}
-      </div>
+    <div className="h-screen w-full snap-y snap-mandatory overflow-y-auto bg-black">
+      {videos.map((video) => (
+        <div
+          key={video.id}
+          className="flex h-screen w-full items-center justify-center snap-start"
+        >
+          <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg">
+            <Reel video={video} />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

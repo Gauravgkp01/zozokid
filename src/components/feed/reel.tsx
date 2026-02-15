@@ -15,7 +15,7 @@ export function Reel({ video }: { video: Video }) {
   const placeholder = PlaceHolderImages.find((p) => p.id === video.image);
 
   return (
-    <div className="relative h-full w-full flex-shrink-0 snap-start overflow-hidden rounded-lg">
+    <div className="relative h-full w-full flex-shrink-0">
       {placeholder && (
         <Image
           src={placeholder.imageUrl}
