@@ -11,14 +11,18 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/firebase';
+import { initiateEmailSignUp } from '@/firebase/non-blocking-login';
+import React, { useState } from 'react';
 
 export function SignupForm() {
-  const router = useRouter();
+  const auth = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/profiles');
+    initiateEmailSignUp(auth, email, password);
   };
   return (
     <Card className="w-full max-w-sm border-2 shadow-lg">
@@ -37,11 +41,19 @@ export function SignupForm() {
               type="email"
               placeholder="parent@example.com"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required />
+            <Input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-stretch gap-4">
