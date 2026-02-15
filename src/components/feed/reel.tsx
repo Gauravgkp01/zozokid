@@ -1,13 +1,5 @@
 import Image from 'next/image';
-import {
-  ThumbsUp,
-  ThumbsDown,
-  MessageCircle,
-  Send,
-  Repeat,
-} from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Button } from '../ui/button';
 
 type Video = {
   id: string;
@@ -40,48 +32,8 @@ export function Reel({ video }: { video: Video }) {
       <div className="absolute bottom-4 left-4 right-4 text-white">
         <div className="flex items-center gap-3">
           <p className="font-bold">{video.channel}</p>
-          <Button
-            size="sm"
-            className="ml-2 rounded-full bg-white text-black hover:bg-white/90"
-          >
-            Subscribe
-          </Button>
         </div>
         <p className="mt-2 text-sm font-medium">{video.title}</p>
-      </div>
-
-      {/* Right Controls */}
-      <div className="absolute bottom-20 right-2 flex flex-col items-center gap-3 text-white">
-        <button className="flex flex-col items-center gap-1 transition-transform active:scale-95">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50">
-            <ThumbsUp className="h-6 w-6" />
-          </div>
-          <span className="text-xs font-bold">{video.likes}</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 transition-transform active:scale-95">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50">
-            <ThumbsDown className="h-6 w-6" />
-          </div>
-          <span className="text-xs font-bold">Dislike</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 transition-transform active:scale-95">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50">
-            <MessageCircle className="h-6 w-6" />
-          </div>
-          <span className="text-xs font-bold">{video.comments}</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 transition-transform active:scale-95">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50">
-            <Send className="h-6 w-6" />
-          </div>
-          <span className="text-xs font-bold">{video.shares}</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 transition-transform active:scale-95">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50">
-            <Repeat className="h-6 w-6" />
-          </div>
-          <span className="text-xs font-bold">Remix</span>
-        </button>
       </div>
     </div>
   );
