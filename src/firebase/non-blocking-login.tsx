@@ -7,21 +7,32 @@ import {
 } from 'firebase/auth';
 import { toast } from '@/hooks/use-toast';
 import { FirebaseError } from 'firebase/app';
+import React from 'react';
+import Link from 'next/link';
 
 function handleAuthError(error: unknown) {
   let title = 'Authentication Error';
-  let description = 'An unknown error occurred. Please try again.';
+  let description: React.ReactNode =
+    'An unknown error occurred. Please try again.';
 
   if (error instanceof FirebaseError) {
     switch (error.code) {
       case 'auth/user-not-found':
-        description = 'This email is not registered. Please sign up first.';
+        description = (
+          <>
+            This email is not registered or no account exists with this email.{' '}
+            <Link href="/signup" className="font-semibold underline">
+              Register to login
+            </Link>
+          </>
+        );
         break;
       case 'auth/wrong-password':
         description = 'Incorrect password. Please try again.';
         break;
       case 'auth/invalid-credential':
-        description = 'The credentials provided are invalid. Please check and try again.';
+        description =
+          'The credentials provided are invalid. Please check and try again.';
         break;
       case 'auth/email-already-in-use':
         description =
