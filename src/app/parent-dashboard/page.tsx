@@ -1,5 +1,13 @@
 import Link from 'next/link';
-import { BarChart3, LogOut, Plus, Users, Video } from 'lucide-react';
+import {
+  BarChart3,
+  LogOut,
+  Plus,
+  Users,
+  Video,
+  Clock,
+  TrendingUp,
+} from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,35 +83,43 @@ export default function ParentDashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Child Profiles
+                Total Watch Time
               </CardTitle>
-              <Users className="h-4 w-4 text-pink-500" />
+              <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">1</div>
-              <p className="text-xs text-muted-foreground">Active profiles</p>
+              <div className="text-2xl font-bold">12h 30m</div>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last week
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Approved Channels
+                New Channels Approved
               </CardTitle>
-              <Video className="h-4 w-4 text-blue-500" />
+              <Video className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">2</div>
-              <p className="text-xs text-muted-foreground">Trusted sources</p>
+              <div className="text-2xl font-bold">+5</div>
+              <p className="text-xs text-muted-foreground">
+                in the last 7 days
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Safety Score</CardTitle>
-              <BarChart3 className="h-4 w-4 text-green-500" />
+              <CardTitle className="text-sm font-medium">
+                Trending Topics
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-green-500">98%</div>
-              <p className="text-xs text-muted-foreground">Content safety</p>
+              <div className="text-2xl font-bold">Space</div>
+              <p className="text-xs text-muted-foreground">
+                Most watched category
+              </p>
             </CardContent>
           </Card>
         </div>
