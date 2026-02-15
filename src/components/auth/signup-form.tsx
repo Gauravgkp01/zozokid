@@ -31,10 +31,6 @@ export function SignupForm() {
       <form onSubmit={handleSignup}>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="full-name">Full Name</Label>
-            <Input id="full-name" placeholder="Parent Name" required />
-          </div>
-          <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -46,6 +42,10 @@ export function SignupForm() {
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" required />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input id="phone" type="tel" placeholder="123-456-7890" required />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-stretch gap-4">
