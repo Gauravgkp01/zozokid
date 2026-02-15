@@ -61,6 +61,21 @@
           "description": "The child's date of birth, used for age-appropriate content suggestions and filtering.",
           "format": "date"
         },
+        "class": {
+          "type": "string",
+          "description": "The child's current class or grade level.",
+          "enum": [
+            "Pre-nursery",
+            "Nursery",
+            "LKG",
+            "UKG",
+            "1st",
+            "2nd",
+            "3rd",
+            "4th",
+            "5th"
+          ]
+        },
         "avatarUrl": {
           "type": "string",
           "description": "URL to the child's selected avatar or profile picture.",
@@ -110,6 +125,7 @@
         "parentId",
         "name",
         "dateOfBirth",
+        "class",
         "createdAt",
         "updatedAt"
       ]
