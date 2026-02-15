@@ -1,0 +1,331 @@
+{
+  "entities": {
+    "Parent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Parent",
+      "type": "object",
+      "description": "Represents a parent user account within KidTube Safe, linked to an external authentication system. Stores core information about the parent.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Parent entity."
+        },
+        "externalAuthId": {
+          "type": "string",
+          "description": "Unique identifier from the external authentication system for this parent. Used to link KidTube Safe data to the authenticated user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the parent, provided during registration. Used for identification and communication.",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the parent profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the parent profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "externalAuthId",
+        "email",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ChildProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChildProfile",
+      "type": "object",
+      "description": "Represents a child's profile created by a parent, including their personalized content filtering preferences.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ChildProfile entity."
+        },
+        "parentId": {
+          "type": "string",
+          "description": "Reference to the Parent who created this child profile. (Relationship: Parent 1:N ChildProfile)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name or nickname of the child."
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "The child's date of birth, used for age-appropriate content suggestions and filtering.",
+          "format": "date"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "description": "URL to the child's selected avatar or profile picture.",
+          "format": "uri"
+        },
+        "allowedChannelIds": {
+          "type": "array",
+          "description": "References to Channel entities that are explicitly allowed for this child. (Relationship: ChildProfile N:N Channel)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blockedChannelIds": {
+          "type": "array",
+          "description": "References to Channel entities that are explicitly blocked for this child. (Relationship: ChildProfile N:N Channel)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowedContentTypeIds": {
+          "type": "array",
+          "description": "References to ContentType entities that are explicitly allowed for this child. (Relationship: ChildProfile N:N ContentType)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blockedContentTypeIds": {
+          "type": "array",
+          "description": "References to ContentType entities that are explicitly blocked for this child. (Relationship: ChildProfile N:N ContentType)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the child profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the child profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "parentId",
+        "name",
+        "dateOfBirth",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Channel": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Channel",
+      "type": "object",
+      "description": "Represents a YouTube channel that can be referenced in content filters.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Channel entity."
+        },
+        "youtubeChannelId": {
+          "type": "string",
+          "description": "The unique identifier for the channel as provided by the YouTube API."
+        },
+        "name": {
+          "type": "string",
+          "description": "The public name of the YouTube channel."
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "description": "URL to the channel's thumbnail image.",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the channel's content."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL to the YouTube channel page.",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the channel record was first created in KidTube Safe.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the channel record was last updated in KidTube Safe.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "youtubeChannelId",
+        "name",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ContentType": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContentType",
+      "type": "object",
+      "description": "Represents a category or type of content defined within KidTube Safe (e.g., Educational, Cartoons).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ContentType entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the content type (e.g., 'Educational Videos', 'Animated Shorts')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of what this content type entails."
+        },
+        "iconUrl": {
+          "type": "string",
+          "description": "URL to an icon representing this content type in the UI.",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the content type was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the content type was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "VideoWatchEvent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "VideoWatchEvent",
+      "type": "object",
+      "description": "Records an instance of a child watching a video, used for analytics and tracking consumption patterns.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the VideoWatchEvent entity."
+        },
+        "childProfileId": {
+          "type": "string",
+          "description": "Reference to the ChildProfile that watched the video. (Relationship: ChildProfile 1:N VideoWatchEvent)"
+        },
+        "youtubeVideoId": {
+          "type": "string",
+          "description": "The unique identifier for the video as provided by the YouTube API."
+        },
+        "channelId": {
+          "type": "string",
+          "description": "Reference to the Channel entity from which the video originated. (Relationship: Channel 1:N VideoWatchEvent)"
+        },
+        "contentTypeId": {
+          "type": "string",
+          "description": "Reference to the primary ContentType assigned to this video by KidTube Safe's categorization. (Relationship: ContentType 1:N VideoWatchEvent)"
+        },
+        "watchDurationSeconds": {
+          "type": "number",
+          "description": "The duration, in seconds, for which the video was watched by the child."
+        },
+        "watchedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the video watch event occurred.",
+          "format": "date-time"
+        },
+        "videoTitle": {
+          "type": "string",
+          "description": "The title of the video at the time it was watched (for historical data stability)."
+        },
+        "videoThumbnailUrl": {
+          "type": "string",
+          "description": "URL to the thumbnail of the video at the time it was watched.",
+          "format": "uri"
+        },
+        "videoUrl": {
+          "type": "string",
+          "description": "The URL to the YouTube video at the time it was watched.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "childProfileId",
+        "youtubeVideoId",
+        "channelId",
+        "contentTypeId",
+        "watchDurationSeconds",
+        "watchedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/parents/{parentId}",
+        "definition": {
+          "entityName": "Parent",
+          "schema": {
+            "$ref": "#/backend/entities/Parent"
+          },
+          "description": "Stores individual parent user profiles. The document ID (`parentId`) MUST match the Firebase Authentication UID (`request.auth.uid`) for direct ownership and access control."
+        }
+      },
+      {
+        "path": "/parents/{parentId}/childProfiles/{childProfileId}",
+        "definition": {
+          "entityName": "ChildProfile",
+          "schema": {
+            "$ref": "#/backend/entities/ChildProfile"
+          },
+          "description": "Contains child profiles created by a specific parent. The `parentId` in the document matches the parent in the path, enabling authorization independence without `get()` calls. Includes denormalized 'parentId' for authorization independence."
+        }
+      },
+      {
+        "path": "/parents/{parentId}/childProfiles/{childProfileId}/videoWatchEvents/{eventId}",
+        "definition": {
+          "entityName": "VideoWatchEvent",
+          "schema": {
+            "$ref": "#/backend/entities/VideoWatchEvent"
+          },
+          "description": "Records individual video watch events for a child profile. Each document includes denormalized 'parentId' to link directly to the owning parent, ensuring authorization independence for security rules. The 'childProfileId' in the document links to the child profile in the path."
+        }
+      },
+      {
+        "path": "/channels/{channelId}",
+        "definition": {
+          "entityName": "Channel",
+          "schema": {
+            "$ref": "#/backend/entities/Channel"
+          },
+          "description": "Global collection of YouTube channel metadata. This data is read-only for parents and provides a central repository for channels referenced in child content filters."
+        }
+      },
+      {
+        "path": "/contentTypes/{contentTypeId}",
+        "definition": {
+          "entityName": "ContentType",
+          "schema": {
+            "$ref": "#/backend/entities/ContentType"
+          },
+          "description": "Global collection of predefined content type categories. This data is read-only for parents and provides a central repository for content types referenced in child content filters."
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure for KidTube Safe prioritizes security, scalability, and debuggability by strictly adhering to the core design principles. The structure uses a hierarchical model for parent-owned data and segregates global, read-only data into top-level collections.\n\n**Authorization Independence (CRITICAL):**\n1.  **Parent Profiles:** The `/parents/{parentId}` collection uses the `parentId` wildcard, which directly corresponds to `request.auth.uid`. This makes authentication straightforward and atomic, as rules can check `request.auth.uid == parentId` without any `get()` operations.\n2.  **Child Profiles:** For `/parents/{parentId}/childProfiles/{childProfileId}`, the `ChildProfile` document explicitly contains a `parentId` field. This denormalization ensures that rules can verify `request.auth.uid == resource.data.parentId` (or `request.auth.uid == parentId` from the path) without needing to perform a `get()` operation on the parent document. This directly addresses Strategy A.\n3.  **Video Watch Events:** Similarly, for `/parents/{parentId}/childProfiles/{childProfileId}/videoWatchEvents/{eventId}`, each `VideoWatchEvent` document is designed to include a `parentId` field (denormalized from its owning `ChildProfile`'s parent). This allows security rules to evaluate `request.auth.uid == resource.data.parentId` (or `request.auth.uid == parentId` from the path) directly on the `VideoWatchEvent` document, completely eliminating `get()` calls for authorization checks. This is a prime example of Strategy A in action.\n\n**QAPs (Rules are not Filters):**\n1.  **Hierarchical Private Data:** For `/parents/{parentId}/childProfiles` and `/parents/{parentId}/childProfiles/{childProfileId}/videoWatchEvents`, the use of `request.auth.uid` directly in the path wildcard (`parentId`) ensures that `list` operations are inherently secure. A query to `/parents/{request.auth.uid}/childProfiles` will only ever return documents belonging to the authenticated user. The security rules will enforce this path-based ownership, guaranteeing that the rules are not acting as filters on a larger, unauthorized dataset. This prevents clients from requesting data they don't own and relying on server-side filtering.\n2.  **Global Read-Only Data:** The `/channels` and `/contentTypes` collections are designed as global, largely read-only lookups. Their security rules can be set to allow reads for any authenticated user (`allow read: if request.auth.uid != null;`). Since these collections contain public/platform-wide data, there's no need for user-specific filtering, thus satisfying QAPs.\n\n**Structural Segregation (Strategy B):**\n*   Parent-specific data (`ChildProfile`, `VideoWatchEvent`) is nested under the parent's `uid` to ensure strict ownership and homogeneous security requirements within those subcollections.\n*   Global reference data (`Channel`, `ContentType`) resides in top-level collections, signifying their broader availability and different security posture (read-only for all parents).\n\nThis design ensures robust security rules, simplifies debugging, and supports efficient queries by making authorization context explicit within each document or derivable directly from the path, rather than relying on expensive and complex cross-document lookups."
+  }
+}
