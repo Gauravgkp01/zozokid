@@ -2,22 +2,19 @@
  * This ruleset enforces a strict user-ownership security model for the KidTube Safe application.
  *
  * Core Philosophy:
- * The security model is centered around the "Parent" user. Each parent has exclusive control over their own data tree, which includes their personal profile, their children's profiles, and their children's viewing analytics. This ensures strong data isolation and privacy between different parent accounts.
+ * The security model is centered around "Parent" and "Teacher" user roles. Each parent has exclusive control over their own data tree (child profiles, analytics). Teachers can create classes and can be granted access to view specific child profiles by parents.
  *
  * Data Structure:
  * All user-specific data is hierarchically nested under the `/parents/{parentId}` path, where `{parentId}` is the authenticated user's UID. This structure allows for simple and performant path-based security rules. Global, shared data, such as YouTube channel information and content categories, are stored in separate top-level collections (`/channels`, `/contentTypes`) and are configured to be read-only for all authenticated users.
  *
  * Key Security Decisions:
- * - Strict Ownership: A user can only access documents where their UID matches the `{parentId}` in the document path. There is no concept of shared access between parents.
- * - No User Enumeration: Listing the top-level `/parents` collection is explicitly disallowed to prevent any user from discovering other users on the platform.
- * - Read-Only Global Data: The `/channels` and `/contentTypes` collections are read-only for all authenticated users. Data in these collections is expected to be managed by trusted backend processes (e.g., an Admin SDK), not directly by end-users.
+ * - Strict Ownership: A user can only access documents where their UID matches the `{parentId}` or `{teacherId}` in the document path.
+ * - Role-Based Access: Teachers can be granted read access to child profiles via the `sharedWithTeacherIds` field.
+ * - No User Enumeration: Listing the top-level `/parents` or `/teachers` collection is explicitly disallowed.
  * - Default Deny: Any operation not explicitly granted is denied.
  *
  * Denormalization for Authorization:
  * To create simpler and more performant rules, this ruleset relies on denormalized ownership fields. For example, `ChildProfile` documents contain a `parentId` field. This allows rules to verify ownership by inspecting the document being written, avoiding slow and costly `get()` calls to parent documents.
- *
- * Structural Segregation:
- * Private, user-owned data (child profiles, watch events) is structurally segregated under a user-specific path (`/parents/{parentId}/...`). Publicly readable reference data (`channels`, `contentTypes`) is stored in separate top-level collections. This clear separation simplifies rule logic and improves query performance.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -33,7 +30,6 @@ service cloud.firestore {
     }
 
     // Combines ownership check with a check that the document already exists.
-    // CRITICAL for preventing writes to non-existent paths on update/delete.
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
@@ -51,6 +47,18 @@ service cloud.firestore {
       return data.id == resource.data.id
           && data.externalAuthId == resource.data.externalAuthId;
     }
+    
+    // Validates the core fields for a Teacher document on creation.
+    function hasValidTeacherDataOnCreate(teacherId) {
+      let data = request.resource.data;
+      return data.id == teacherId && data.externalAuthId == teacherId;
+    }
+
+    // Enforces immutability for key fields of a Teacher document on update.
+    function hasValidTeacherDataOnUpdate() {
+        let data = request.resource.data;
+        return data.id == resource.data.id && data.externalAuthId == resource.data.externalAuthId;
+    }
 
     // Validates the parentId link on ChildProfile creation.
     function hasValidChildProfileDataOnCreate(parentId) {
@@ -64,7 +72,6 @@ service cloud.firestore {
     
     // Validates relational integrity for a VideoWatchEvent on creation.
     function hasValidWatchEventDataOnCreate(parentId, childProfileId) {
-      // The IR reasoning mandates a denormalized parentId for authorization.
       return request.resource.data.parentId == parentId
           && request.resource.data.childProfileId == childProfileId;
     }
@@ -75,13 +82,18 @@ service cloud.firestore {
           && request.resource.data.childProfileId == resource.data.childProfileId;
     }
 
+    // Validates ownership for a new Class.
+    function hasValidClassDataOnCreate() {
+        return request.resource.data.teacherId == request.auth.uid;
+    }
+
+    // Enforces immutability of the teacherId for a Class.
+    function hasValidClassDataOnUpdate() {
+        return request.resource.data.teacherId == resource.data.teacherId;
+    }
+
     /**
-     * @description Manages parent user profiles. A user can create their own profile, and then has full read/write access to it.
-     * @path /parents/{parentId}
-     * @allow (create) An authenticated user creating their own parent profile document where the ID matches their auth UID. `auth.uid: 'user123'`, `path: /parents/user123`.
-     * @deny (get) An authenticated user trying to read another user's profile. `auth.uid: 'user123'`, `path: /parents/user456`.
-     * @deny (list) Any user trying to list all parent profiles. `path: /parents`.
-     * @principle Enforces self-creation and strict document ownership. Prevents user enumeration.
+     * @description Manages parent user profiles.
      */
     match /parents/{parentId} {
       allow get: if isOwner(parentId);
@@ -91,14 +103,10 @@ service cloud.firestore {
       allow delete: if isExistingOwner(parentId);
 
       /**
-       * @description Manages child profiles owned by a parent. Only the parent can manage their children's profiles.
-       * @path /parents/{parentId}/childProfiles/{childProfileId}
-       * @allow (create) A parent creating a new child profile under their own account. `auth.uid: 'user123'`, `path: /parents/user123/childProfiles/childABC`.
-       * @deny (update) A parent trying to modify a child profile belonging to another parent. `auth.uid: 'user123'`, `path: /parents/user456/childProfiles/childXYZ`.
-       * @principle Restricts access to a user's own data tree through path-based ownership.
+       * @description Manages child profiles owned by a parent. A parent has full control. A teacher can read if they are in the `sharedWithTeacherIds` list.
        */
       match /childProfiles/{childProfileId} {
-        allow get: if isOwner(parentId);
+        allow get: if isOwner(parentId) || (isSignedIn() && resource.data.sharedWithTeacherIds.hasAny([request.auth.uid]));
         allow list: if isOwner(parentId);
         allow create: if isOwner(parentId) && hasValidChildProfileDataOnCreate(parentId);
         allow update: if isExistingOwner(parentId) && hasValidChildProfileDataOnUpdate();
@@ -106,10 +114,6 @@ service cloud.firestore {
 
         /**
          * @description Manages analytics data (video watch events) for a specific child profile.
-         * @path /parents/{parentId}/childProfiles/{childProfileId}/videoWatchEvents/{eventId}
-         * @allow (list) A parent listing the watch history for one of their children. `auth.uid: 'user123'`, `path: /parents/user123/childProfiles/childABC/videoWatchEvents`.
-         * @deny (create) A parent trying to add a watch event to another parent's child. `auth.uid: 'user123'`, `path: /parents/user456/childProfiles/childXYZ/videoWatchEvents/event789`.
-         * @principle Enforces deep, hierarchical ownership and validates relational integrity between parent, child, and event.
          */
         match /videoWatchEvents/{eventId} {
           allow get: if isOwner(parentId);
@@ -120,13 +124,31 @@ service cloud.firestore {
         }
       }
     }
+    
+    /**
+     * @description Manages teacher user profiles.
+     */
+    match /teachers/{teacherId} {
+      allow get: if isOwner(teacherId);
+      allow list: if false;
+      allow create: if isOwner(teacherId) && hasValidTeacherDataOnCreate(teacherId);
+      allow update: if isExistingOwner(teacherId) && hasValidTeacherDataOnUpdate();
+      allow delete: if isExistingOwner(teacherId);
+    }
+    
+    /**
+     * @description Global collection for classes. Only the creating teacher can manage their class.
+     */
+    match /classes/{classId} {
+      allow get: if isSignedIn() && resource.data.teacherId == request.auth.uid;
+      allow list: if isSignedIn(); // Client must filter by teacherId
+      allow create: if isSignedIn() && hasValidClassDataOnCreate();
+      allow update: if isSignedIn() && resource.data.teacherId == request.auth.uid && hasValidClassDataOnUpdate();
+      allow delete: if isSignedIn() && resource.data.teacherId == request.auth.uid;
+    }
 
     /**
-     * @description Global collection of YouTube channel metadata. This is read-only for all authenticated users.
-     * @path /channels/{channelId}
-     * @allow (get, list) Any authenticated user can read channel information. `auth.uid: 'user123'`, `path: /channels/channelXYZ`.
-     * @deny (create, update, delete) No client-side modifications are allowed. This data is managed by a backend admin process.
-     * @principle Provides public, read-only reference data while securing it against unauthorized modification.
+     * @description Global collection of YouTube channel metadata. Read-only for authenticated users.
      */
     match /channels/{channelId} {
       allow get: if isSignedIn();
@@ -137,11 +159,7 @@ service cloud.firestore {
     }
 
     /**
-     * @description Global collection of predefined content categories. This is read-only for all authenticated users.
-     * @path /contentTypes/{contentTypeId}
-     * @allow (get, list) Any authenticated user can read content type information. `auth.uid: 'user123'`, `path: /contentTypes/educational`.
-     * @deny (create, update, delete) No client-side modifications are allowed. This data is managed by a backend admin process.
-     * @principle Provides public, read-only reference data while securing it against unauthorized modification.
+     * @description Global collection of predefined content categories. Read-only for authenticated users.
      */
     match /contentTypes/{contentTypeId} {
       allow get: if isSignedIn();

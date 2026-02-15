@@ -38,6 +38,81 @@
         "updatedAt"
       ]
     },
+    "TeacherProfile": {
+      "title": "TeacherProfile",
+      "type": "object",
+      "description": "Represents a teacher user account.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "externalAuthId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "externalAuthId",
+        "email",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Class": {
+      "title": "Class",
+      "type": "object",
+      "description": "Represents a class created by a teacher, containing a list of student profiles.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Class entity."
+        },
+        "teacherId": {
+          "type": "string",
+          "description": "The UID of the teacher who created and owns this class."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the class (e.g., 'Morning Group', 'Grade 2 Reading')."
+        },
+        "studentIds": {
+          "type": "array",
+          "description": "An array of ChildProfile IDs that belong to this class.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the class was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the class was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "teacherId",
+        "name",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
     "ChildProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "ChildProfile",
@@ -56,10 +131,9 @@
           "type": "string",
           "description": "The name or nickname of the child."
         },
-        "dateOfBirth": {
-          "type": "string",
-          "description": "The child's date of birth, used for age-appropriate content suggestions and filtering.",
-          "format": "date"
+        "age": {
+          "type": "number",
+          "description": "The child's age, used for age-appropriate content suggestions and filtering."
         },
         "class": {
           "type": "string",
@@ -109,6 +183,13 @@
             "type": "string"
           }
         },
+        "sharedWithTeacherIds": {
+          "type": "array",
+          "description": "A list of teacher UIDs that have been granted read access to this child's profile by the parent.",
+          "items": {
+            "type": "string"
+          }
+        },
         "createdAt": {
           "type": "string",
           "description": "Timestamp indicating when the child profile was created.",
@@ -124,7 +205,7 @@
         "id",
         "parentId",
         "name",
-        "dateOfBirth",
+        "age",
         "class",
         "createdAt",
         "updatedAt"
@@ -302,6 +383,26 @@
         }
       },
       {
+        "path": "/teachers/{teacherId}",
+        "definition": {
+          "entityName": "TeacherProfile",
+          "schema": {
+            "$ref": "#/backend/entities/TeacherProfile"
+          },
+          "description": "Stores individual teacher user profiles. The document ID (`teacherId`) MUST match the Firebase Authentication UID (`request.auth.uid`) for direct ownership and access control."
+        }
+      },
+      {
+        "path": "/classes/{classId}",
+        "definition": {
+          "entityName": "Class",
+          "schema": {
+            "$ref": "#/backend/entities/Class"
+          },
+          "description": "Global collection of classes created by teachers. Security rules will enforce that only the creating teacher can modify their own classes."
+        }
+      },
+      {
         "path": "/parents/{parentId}/childProfiles/{childProfileId}",
         "definition": {
           "entityName": "ChildProfile",
@@ -342,6 +443,6 @@
         }
       }
     ],
-    "reasoning": "The recommended Firestore structure for KidTube Safe prioritizes security, scalability, and debuggability by strictly adhering to the core design principles. The structure uses a hierarchical model for parent-owned data and segregates global, read-only data into top-level collections.\n\n**Authorization Independence (CRITICAL):**\n1.  **Parent Profiles:** The `/parents/{parentId}` collection uses the `parentId` wildcard, which directly corresponds to `request.auth.uid`. This makes authentication straightforward and atomic, as rules can check `request.auth.uid == parentId` without any `get()` operations.\n2.  **Child Profiles:** For `/parents/{parentId}/childProfiles/{childProfileId}`, the `ChildProfile` document explicitly contains a `parentId` field. This denormalization ensures that rules can verify `request.auth.uid == resource.data.parentId` (or `request.auth.uid == parentId` from the path) without needing to perform a `get()` operation on the parent document. This directly addresses Strategy A.\n3.  **Video Watch Events:** Similarly, for `/parents/{parentId}/childProfiles/{childProfileId}/videoWatchEvents/{eventId}`, each `VideoWatchEvent` document is designed to include a `parentId` field (denormalized from its owning `ChildProfile`'s parent). This allows security rules to evaluate `request.auth.uid == resource.data.parentId` (or `request.auth.uid == parentId` from the path) directly on the `VideoWatchEvent` document, completely eliminating `get()` calls for authorization checks. This is a prime example of Strategy A in action.\n\n**QAPs (Rules are not Filters):**\n1.  **Hierarchical Private Data:** For `/parents/{parentId}/childProfiles` and `/parents/{parentId}/childProfiles/{childProfileId}/videoWatchEvents`, the use of `request.auth.uid` directly in the path wildcard (`parentId`) ensures that `list` operations are inherently secure. A query to `/parents/{request.auth.uid}/childProfiles` will only ever return documents belonging to the authenticated user. The security rules will enforce this path-based ownership, guaranteeing that the rules are not acting as filters on a larger, unauthorized dataset. This prevents clients from requesting data they don't own and relying on server-side filtering.\n2.  **Global Read-Only Data:** The `/channels` and `/contentTypes` collections are designed as global, largely read-only lookups. Their security rules can be set to allow reads for any authenticated user (`allow read: if request.auth.uid != null;`). Since these collections contain public/platform-wide data, there's no need for user-specific filtering, thus satisfying QAPs.\n\n**Structural Segregation (Strategy B):**\n*   Parent-specific data (`ChildProfile`, `VideoWatchEvent`) is nested under the parent's `uid` to ensure strict ownership and homogeneous security requirements within those subcollections.\n*   Global reference data (`Channel`, `ContentType`) resides in top-level collections, signifying their broader availability and different security posture (read-only for all parents).\n\nThis design ensures robust security rules, simplifies debugging, and supports efficient queries by making authorization context explicit within each document or derivable directly from the path, rather than relying on expensive and complex cross-document lookups."
+    "reasoning": "The recommended Firestore structure for KidTube Safe prioritizes security, scalability, and debuggability by strictly adhering to the core design principles. The structure uses a hierarchical model for parent-owned data and segregates global, read-only data into top-level collections.\\n\\n**Authorization Independence (CRITICAL):**\\n1.  **Parent & Teacher Profiles:** The `/parents/{parentId}` and `/teachers/{teacherId}` collections use a wildcard that directly corresponds to `request.auth.uid`. This makes authentication straightforward and atomic, as rules can check `request.auth.uid == parentId` (or `teacherId`) without any `get()` operations.\\n2.  **Child Profiles:** For `/parents/{parentId}/childProfiles/{childProfileId}`, the `ChildProfile` document explicitly contains a `parentId` field. This denormalization ensures that rules can verify `request.auth.uid == resource.data.parentId` without needing to perform a `get()` operation on the parent document. The addition of `sharedWithTeacherIds` allows teachers to gain read access if their UID is in that array.\\n3.  **Video Watch Events:** Similarly, for `/parents/{parentId}/childProfiles/{childProfileId}/videoWatchEvents/{eventId}`, each `VideoWatchEvent` document is designed to include a `parentId` field (denormalized from its owning `ChildProfile`'s parent). This allows security rules to evaluate `request.auth.uid == resource.data.parentId` directly.\\n\\n**QAPs (Rules are not Filters):**\\n1.  **Hierarchical Private Data:** For `/parents/{parentId}/childProfiles` and video events, `request.auth.uid` in the path ensures `list` operations are inherently secure.\\n2.  **Global Data:** The `/channels`, `/contentTypes`, and `/classes` collections are global. Access to `/classes` is controlled by checking the `teacherId` in the document against the requester's UID, which is enforced on the client-side query and backed by security rules.\\n\\n**Structural Segregation (Strategy B):**\\n*   User-specific data (`ChildProfile`, `VideoWatchEvent`) is nested under the parent's `uid` to ensure strict ownership.\\n*   Teacher-specific data (`Class`) is in a top-level collection, queryable by `teacherId`.\\n*   Global reference data (`Channel`, `ContentType`) resides in top-level collections for broad availability."
   }
 }
