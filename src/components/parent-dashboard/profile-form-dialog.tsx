@@ -223,7 +223,13 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: ProfileFormDi
                 <FormItem>
                   <FormLabel>Child's Age</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="e.g. 5" {...field} onChange={event => field.onChange(+event.target.value)} />
+                    <Input 
+                      type="number" 
+                      placeholder="e.g. 5" 
+                      {...field} 
+                      value={field.value ?? ''}
+                      onChange={event => field.onChange(event.target.value === '' ? undefined : +event.target.value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -270,5 +276,3 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: ProfileFormDi
     </Dialog>
   );
 }
-
-    
