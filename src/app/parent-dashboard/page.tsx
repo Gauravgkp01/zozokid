@@ -229,8 +229,11 @@ export default function ParentDashboardPage() {
                     variant="outline"
                     size="icon"
                     className="rounded-full"
+                    asChild
                   >
-                    <BarChart3 className="h-5 w-5" />
+                    <Link href={`/parent-dashboard/analytics/${profile.id}`}>
+                      <BarChart3 className="h-5 w-5" />
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -269,5 +272,3 @@ export default function ParentDashboardPage() {
     </div>
   );
 }
-
-    
