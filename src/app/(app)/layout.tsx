@@ -47,13 +47,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   Feed
                 </Link>
                 <Link
-                  href="/dashboard"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <User className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <Link
                   href="/settings"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >

@@ -18,7 +18,7 @@ export function SignupForm() {
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/feed');
+    router.push('/profiles');
   };
   return (
     <Card className="w-full max-w-sm border-2 shadow-lg">
@@ -42,10 +42,6 @@ export function SignupForm() {
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" required />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" type="tel" placeholder="123-456-7890" required />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-stretch gap-4">

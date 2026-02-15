@@ -12,7 +12,6 @@ import { Home, Settings, User, LogOut } from 'lucide-react';
 
 const navItems = [
   { href: '/feed', label: 'Feed', icon: Home },
-  { href: '/dashboard', label: 'Dashboard', icon: User },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 

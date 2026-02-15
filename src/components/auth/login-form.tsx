@@ -18,7 +18,7 @@ export function LoginForm() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/feed');
+    router.push('/profiles');
   };
 
   return (
