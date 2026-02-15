@@ -10,6 +10,7 @@ import {
   TrendingUp,
   Plus,
   Loader2,
+  Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,9 +20,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { AddChildDialog } from '@/components/parent-dashboard/add-child-dialog';
+import { ProfileFormDialog } from '@/components/parent-dashboard/profile-form-dialog';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
+import Image from 'next/image';
+import { useState } from 'react';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -52,7 +55,7 @@ const ZoZoKidLogo = () => (
     </svg>
 );
   
-type ChildProfile = {
+export type ChildProfile = {
     id: string;
     name: string;
     dateOfBirth: string;
@@ -74,6 +77,9 @@ const getAge = (dateString: string) => {
 
 export default function ParentDashboardPage() {
     const { user, firestore } = useFirebase();
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [profileToEdit, setProfileToEdit] = useState<ChildProfile | undefined>(undefined);
+
 
     const childProfilesQuery = useMemoFirebase(() => {
         if (!user || !firestore) return null;
@@ -81,6 +87,16 @@ export default function ParentDashboardPage() {
       }, [user, firestore]);
     
     const { data: profiles, isLoading } = useCollection<ChildProfile>(childProfilesQuery);
+
+    const handleAddProfile = () => {
+      setProfileToEdit(undefined);
+      setDialogOpen(true);
+    }
+    
+    const handleEditProfile = (profile: ChildProfile) => {
+      setProfileToEdit(profile);
+      setDialogOpen(true);
+    }
     
   return (
     <div className="light min-h-screen bg-white font-body text-foreground">
@@ -190,6 +206,15 @@ export default function ParentDashboardPage() {
             {!isLoading && profiles && profiles.map((profile) => (
               <div key={profile.id} className="flex items-center justify-between rounded-lg border p-3">
                 <div className="flex items-center gap-3">
+                   {profile.avatarUrl && (
+                        <Image
+                            src={profile.avatarUrl}
+                            alt={profile.name}
+                            width={40}
+                            height={40}
+                            className="rounded-full object-cover"
+                        />
+                    )}
                   <div>
                     <p className="font-bold">{profile.name}</p>
                     <p className="text-sm text-muted-foreground">Age: {getAge(profile.dateOfBirth)}</p>
@@ -207,6 +232,14 @@ export default function ParentDashboardPage() {
                     variant="outline"
                     size="icon"
                     className="rounded-full"
+                    onClick={() => handleEditProfile(profile)}
+                  >
+                    <Pencil className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full"
                   >
                     <BarChart3 className="h-5 w-5" />
                   </Button>
@@ -216,7 +249,10 @@ export default function ParentDashboardPage() {
              {!isLoading && (!profiles || profiles.length === 0) && (
                 <p className="py-4 text-center text-muted-foreground">No child profiles yet.</p>
              )}
-              <AddChildDialog />
+              <Button variant="outline" className="w-full rounded-full" onClick={handleAddProfile}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Another Child
+            </Button>
             </CardContent>
           </Card>
 
@@ -240,6 +276,7 @@ export default function ParentDashboardPage() {
           </Card>
         </div>
       </main>
+      <ProfileFormDialog open={dialogOpen} onOpenChange={setDialogOpen} profile={profileToEdit} />
     </div>
   );
 }

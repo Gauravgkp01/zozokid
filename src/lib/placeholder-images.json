@@ -37,22 +37,28 @@
       "imageHint": "profile portrait"
     },
     {
-      "id": "avatar-child",
-      "description": "A generic avatar for a child.",
-      "imageUrl": "https://images.unsplash.com/photo-1690639866830-ee4d95b89718?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjaGlsZCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3MTEzODk5MXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "child portrait"
-    },
-    {
-      "id": "profile-kid",
-      "description": "A kid's profile picture with a retro sign.",
-      "imageUrl": "https://images.unsplash.com/photo-1570163194329-7c8a1e28509e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhbXVzZW1lbnQlMjBwYXJrJTIwc2lnbnxlbnwwfHx8fDE3MTI5ODc1MjR8MA&ixlib=rb-4.0.3&q=80&w=400",
-      "imageHint": "amusement park"
-    },
-    {
-      "id": "profile-pippo",
-      "description": "A cartoon bear avatar for the child profile Pippo.",
-      "imageUrl": "https://images.unsplash.com/photo-1758998427000-b316024a8943?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjYXJ0b29uJTIwYmVhcnxlbnwwfHx8fDE3NzExNjc5MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "id": "avatar-bear",
+      "description": "A cartoon bear avatar.",
+      "imageUrl": "https://images.unsplash.com/photo-1766132078302-4bd01f25f6cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjYXJ0b29uJTIwYmVhcnxlbnwwfHx8fDE3NzExNjc5MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "cartoon bear"
+    },
+    {
+      "id": "avatar-cat",
+      "description": "A cartoon cat avatar.",
+      "imageUrl": "https://images.unsplash.com/photo-1760768034139-3c2f829ec1b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjYXJ0b29uJTIwY2F0fGVufDB8fHx8MTc3MTE4Mzc4NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cartoon cat"
+    },
+    {
+      "id": "avatar-dog",
+      "description": "A cartoon dog avatar.",
+      "imageUrl": "https://images.unsplash.com/photo-1555370358-a7ce3ab16f60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjYXJ0b29uJTIwZG9nfGVufDB8fHx8MTc3MTExMjc3MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cartoon dog"
+    },
+    {
+      "id": "avatar-robot",
+      "description": "A cartoon robot avatar.",
+      "imageUrl": "https://images.unsplash.com/photo-1543955946-8d33e764d8f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjYXJ0b29uJTIwcm9ib3R8ZW58MHx8fHwxNzcxMTgzNzg1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cartoon robot"
     }
   ]
 }
