@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "reel-space",
+      "description": "A kid-friendly animation of a rocket in space.",
+      "imageUrl": "https://images.unsplash.com/photo-1614728263952-84ea256f9679?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzcGFjZSUyMHJvY2tldHxlbnwwfHx8fDE3NzExNTA4MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "space rocket"
+    },
+    {
+      "id": "reel-lego",
+      "description": "A colorful close-up of LEGO bricks.",
+      "imageUrl": "https://images.unsplash.com/photo-1632304529453-f9338ac1c3e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxsZWdvJTIwYnJpY2tzfGVufDB8fHx8MTc3MTE2NjkwMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "lego bricks"
+    },
+    {
+      "id": "reel-drawing",
+      "description": "A child's drawing of a cute animal.",
+      "imageUrl": "https://images.unsplash.com/photo-1650504148053-ae51b12dc1d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaGlsZCUyMGRyYXdpbmd8ZW58MHx8fHwxNzcxMTY2OTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "child drawing"
+    },
+    {
+      "id": "reel-minecraft",
+      "description": "A screenshot from the game Minecraft showing a creative build.",
+      "imageUrl": "https://images.unsplash.com/photo-1760114333167-7f254ca9f3c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtaW5lY3JhZnQlMjBnYW1lfGVufDB8fHx8MTc3MTE1OTc3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "minecraft game"
+    },
+    {
+      "id": "avatar-parent",
+      "description": "A generic avatar for a parent.",
+      "imageUrl": "https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwcm9maWxlJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzcxMTY2OTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "profile portrait"
+    },
+    {
+      "id": "avatar-child",
+      "description": "A generic avatar for a child.",
+      "imageUrl": "https://images.unsplash.com/photo-1690639866830-ee4d95b89718?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjaGlsZCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3MTEzODk5MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "child portrait"
+    }
+  ]
 }
