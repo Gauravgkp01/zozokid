@@ -41,6 +41,12 @@
       "description": "A kid's profile picture with a retro sign.",
       "imageUrl": "https://images.unsplash.com/photo-1570163194329-7c8a1e28509e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhbXVzZW1lbnQlMjBwYXJrJTIwc2lnbnxlbnwwfHx8fDE3MTI5ODc1MjR8MA&ixlib=rb-4.0.3&q=80&w=400",
       "imageHint": "amusement park"
+    },
+    {
+      "id": "profile-pippo",
+      "description": "A cartoon bear avatar for the child profile Pippo.",
+      "imageUrl": "https://images.unsplash.com/photo-1758998427000-b316024a8943?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjYXJ0b29uJTIwYmVhcnxlbnwwfHx8fDE3NzExNjc5MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cartoon bear"
     }
   ]
 }

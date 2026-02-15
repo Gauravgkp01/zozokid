@@ -10,10 +10,7 @@ import {
 import { Icons } from '@/components/icons';
 import { Home, Settings, User, LogOut } from 'lucide-react';
 
-const navItems = [
-  { href: '/feed', label: 'Feed', icon: Home },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
+const navItems = [{ href: '/feed', label: 'Feed', icon: Home }];
 
 export function AppSidebar() {
   const pathname = usePathname();

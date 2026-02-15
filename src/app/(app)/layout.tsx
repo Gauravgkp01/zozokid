@@ -46,13 +46,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <Home className="h-5 w-5" />
                   Feed
                 </Link>
-                <Link
-                  href="/settings"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Settings className="h-5 w-5" />
-                  Settings
-                </Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -80,7 +73,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/settings">Settings</Link>
+                <Link href="/parent-dashboard">Settings</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>

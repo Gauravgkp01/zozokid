@@ -26,9 +26,15 @@ export default function ProfilesPage() {
             </div>
             <h1 className="text-xl font-bold text-white">SafeKids</h1>
           </div>
-          <Button variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30">
-            <Lock className="mr-2 h-4 w-4" />
-            Parent Controls
+          <Button
+            variant="ghost"
+            className="rounded-full bg-white/20 hover:bg-white/30"
+            asChild
+          >
+            <Link href="/parent-dashboard">
+              <Lock className="mr-2 h-4 w-4" />
+              Parent Controls
+            </Link>
           </Button>
         </header>
 
@@ -43,7 +49,11 @@ export default function ProfilesPage() {
                 <div className="relative">
                   <Avatar className="h-32 w-32 border-4 border-white transition-transform group-hover:scale-105">
                     {profileImage && (
-                       <AvatarImage src={profileImage.imageUrl} alt={profile.name} data-ai-hint={profileImage.imageHint} />
+                      <AvatarImage
+                        src={profileImage.imageUrl}
+                        alt={profile.name}
+                        data-ai-hint={profileImage.imageHint}
+                      />
                     )}
                     <AvatarFallback className="bg-gray-700 text-white">
                       {profile.name.charAt(0).toUpperCase()}
@@ -60,9 +70,15 @@ export default function ProfilesPage() {
         </main>
 
         <footer className="text-center">
-          <Button variant="ghost" className="w-full rounded-full bg-white/20 hover:bg-white/30">
-            <Lock className="mr-2 h-4 w-4" />
-            Manage Profiles in Parent Mode
+          <Button
+            variant="ghost"
+            className="w-full rounded-full bg-white/20 hover:bg-white/30"
+            asChild
+          >
+            <Link href="/parent-dashboard">
+              <Lock className="mr-2 h-4 w-4" />
+              Manage Profiles in Parent Mode
+            </Link>
           </Button>
         </footer>
       </div>
