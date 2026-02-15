@@ -36,10 +36,10 @@
   }
 
   .light {
-    --background: 206 25% 95%; /* #F0F4F7 */
+    --background: 0 0% 100%;
     --foreground: 224 71% 4%; /* Dark blue text */
 
-    --card: 0 0% 100%;
+    --card: 206 25% 95%; /* #F0F4F7 */
     --card-foreground: 224 71% 4%;
 
     --popover: 0 0% 100%;
