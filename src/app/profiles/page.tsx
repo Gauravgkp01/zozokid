@@ -18,9 +18,9 @@ export default function ProfilesPage() {
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 text-purple-900">
-              <span className="font-bold">SK</span>
+              <span className="font-bold">ZK</span>
             </div>
-            <h1 className="text-xl font-bold text-white">SafeKids</h1>
+            <h1 className="text-xl font-bold text-white">ZoZoKid</h1>
           </div>
           <Button
             variant="ghost"

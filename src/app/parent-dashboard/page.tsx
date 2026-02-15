@@ -25,14 +25,24 @@ const ZoZoKidLogo = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <rect x="2" y="7" width="20" height="12" rx="3" fill="#42A5F5" />
+    <path d="M9 11.5L15 15L9 18.5V11.5Z" fill="#FFCA28" />
     <path
-      d="M4 8C4 6.89543 4.89543 6 6 6H18C19.1046 6 20 6.89543 20 8V16C20 17.1046 19.1046 18 18 18H6C4.89543 18 4 17.1046 4 16V8Z"
-      fill="#2196F3"
+      d="M7 7L6 4"
+      stroke="#EC407A"
+      strokeWidth="1.5"
+      strokeLinecap="round"
     />
-    <circle cx="9" cy="12" r="1.5" fill="white" />
-    <circle cx="15" cy="12" r="1.5" fill="white" />
-    <path d="M8 6L7 3" stroke="#FFC107" strokeWidth="2" strokeLinecap="round" />
-    <path d="M16 6L17 3" stroke="#FFC107" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="5.5" cy="3" r="1" fill="#EC407A" />
+    <path
+      d="M17 7L18 4"
+      stroke="#FFCA28"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <circle cx="18.5" cy="3" r="1" fill="#FFCA28" />
+    <path d="M7 19V21" stroke="#1E88E5" strokeWidth="2" strokeLinecap="round" />
+    <path d="M17 19V21" stroke="#1E88E5" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 

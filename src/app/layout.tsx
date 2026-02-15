@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Safe Kids Reels Platform',
+  title: 'ZoZoKid',
   description: 'A safe reels experience for kids.',
 };
 

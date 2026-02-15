@@ -9,13 +9,19 @@ export const Icons = {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-      <path d="m9 12 5-3-5-3v6" />
+      <path d="M7 7L6 4" />
+      <circle cx="5.5" cy="3" r="1" fill="currentColor" />
+      <path d="M17 7L18 4" />
+      <circle cx="18.5" cy="3" r="1" fill="currentColor" />
+      <rect x="2" y="7" width="20" height="12" rx="3" />
+      <path d="M9 11L15 14L9 17V11Z" />
+      <path d="M7 19V21" />
+      <path d="M17 19V21" />
     </svg>
   ),
 };
