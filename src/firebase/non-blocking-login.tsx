@@ -15,9 +15,13 @@ function handleAuthError(error: unknown) {
   if (error instanceof FirebaseError) {
     switch (error.code) {
       case 'auth/user-not-found':
+        description = 'This email is not registered. Please sign up first.';
+        break;
       case 'auth/wrong-password':
+        description = 'Incorrect password. Please try again.';
+        break;
       case 'auth/invalid-credential':
-        description = 'Invalid email or password. Please try again.';
+        description = 'The credentials provided are invalid. Please check and try again.';
         break;
       case 'auth/email-already-in-use':
         description =
