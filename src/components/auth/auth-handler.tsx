@@ -4,8 +4,14 @@ import { useUser } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-const AUTH_ROUTES = ['/login', '/signup'];
-const PRIVATE_ROUTES = ['/feed', '/profiles', '/parent-dashboard'];
+const PARENT_AUTH_ROUTES = ['/login', '/signup'];
+const TEACHER_AUTH_ROUTES = ['/teacher/login', '/teacher/signup'];
+const AUTH_ROUTES = [...PARENT_AUTH_ROUTES, ...TEACHER_AUTH_ROUTES];
+
+const PARENT_PRIVATE_ROUTES = ['/feed', '/profiles', '/parent-dashboard'];
+const TEACHER_PRIVATE_ROUTES = ['/teacher-dashboard'];
+const PRIVATE_ROUTES = [...PARENT_PRIVATE_ROUTES, ...TEACHER_PRIVATE_ROUTES];
+
 
 export function AuthHandler() {
   const { user, isUserLoading } = useUser();
@@ -16,14 +22,29 @@ export function AuthHandler() {
     if (isUserLoading) return;
 
     const isAuthRoute = AUTH_ROUTES.includes(pathname);
-    // Exact match for private routes
-    const isPrivateRoute = PRIVATE_ROUTES.includes(pathname);
-
+    const isPrivateRoute = PRIVATE_ROUTES.some(route => pathname.startsWith(route));
+    
+    // Redirect away from private routes if not logged in
     if (!user && isPrivateRoute) {
-      router.push('/login');
+      if (TEACHER_PRIVATE_ROUTES.some(route => pathname.startsWith(route))) {
+        router.push('/teacher/login');
+      } else {
+        router.push('/login');
+      }
+      return;
     }
+
+    // Redirect away from auth routes if logged in
     if (user && isAuthRoute) {
-      router.push('/profiles');
+      // This is a simplification. A real app would need roles to distinguish
+      // between a parent and a teacher and redirect accordingly.
+      // For now, if on a teacher auth page, go to teacher dashboard.
+      if (TEACHER_AUTH_ROUTES.includes(pathname)) {
+        router.push('/teacher-dashboard');
+      } else {
+        router.push('/profiles');
+      }
+      return;
     }
   }, [user, isUserLoading, pathname, router]);
 
