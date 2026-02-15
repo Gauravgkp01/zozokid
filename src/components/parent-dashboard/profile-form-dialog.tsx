@@ -4,8 +4,6 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
@@ -34,12 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
@@ -62,9 +54,7 @@ const classLevels = [
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  dateOfBirth: z.date({
-    required_error: 'A date of birth is required.',
-  }),
+  age: z.coerce.number().min(0, "Age can't be negative.").max(18, "Please enter a valid age for a child."),
   class: z.enum(classLevels, {
     required_error: 'You need to select a class level.',
   }),
@@ -85,20 +75,25 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: ProfileFormDi
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: '',
+      class: undefined,
+      avatarUrl: avatars[0]?.imageUrl,
+    }
   });
 
   useEffect(() => {
     if (profile && open) {
       form.reset({
         name: profile.name,
-        dateOfBirth: new Date(profile.dateOfBirth),
+        age: profile.age,
         class: profile.class,
         avatarUrl: profile.avatarUrl,
       });
     } else if (!profile && open) {
       form.reset({
         name: '',
-        dateOfBirth: undefined,
+        age: undefined,
         class: undefined,
         avatarUrl: avatars[0]?.imageUrl,
       });
@@ -118,13 +113,13 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: ProfileFormDi
     const profileData = {
       parentId: user.uid,
       name: values.name,
-      dateOfBirth: values.dateOfBirth.toISOString().split('T')[0], // YYYY-MM-DD
+      age: values.age,
       class: values.class,
       avatarUrl: values.avatarUrl,
       updatedAt: new Date().toISOString(),
     };
 
-    if (isEditMode) {
+    if (isEditMode && profile) {
       // Update existing profile
       const profileRef = doc(firestore, 'parents', user.uid, 'childProfiles', profile.id);
       const updatedData = {
@@ -223,41 +218,13 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: ProfileFormDi
             />
             <FormField
               control={form.control}
-              name="dateOfBirth"
+              name="age"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date of Birth</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Child's Age</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="e.g. 5" {...field} onChange={event => field.onChange(+event.target.value)} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -303,3 +270,5 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: ProfileFormDi
     </Dialog>
   );
 }
+
+    

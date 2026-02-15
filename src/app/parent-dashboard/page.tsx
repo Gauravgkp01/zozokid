@@ -58,21 +58,10 @@ const ZoZoKidLogo = () => (
 export type ChildProfile = {
     id: string;
     name: string;
-    dateOfBirth: string;
+    age: number;
     avatarUrl?: string;
     class: string;
-};
-
-const getAge = (dateString: string) => {
-    if (!dateString) return '';
-    const birthDate = new Date(dateString);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
+    createdAt: string;
 };
 
 export default function ParentDashboardPage() {
@@ -217,7 +206,7 @@ export default function ParentDashboardPage() {
                     )}
                   <div>
                     <p className="font-bold">{profile.name}</p>
-                    <p className="text-sm text-muted-foreground">Age: {getAge(profile.dateOfBirth)}</p>
+                    <p className="text-sm text-muted-foreground">Age: {profile.age}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -280,3 +269,5 @@ export default function ParentDashboardPage() {
     </div>
   );
 }
+
+    

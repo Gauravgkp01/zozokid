@@ -11,20 +11,8 @@ import { useEffect } from 'react';
 type ChildProfile = {
   id: string;
   name: string;
-  dateOfBirth: string;
+  age: number;
   avatarUrl?: string;
-};
-
-const getAge = (dateString: string) => {
-  if (!dateString) return '';
-  const birthDate = new Date(dateString);
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return age;
 };
 
 export default function ProfilesPage() {
@@ -114,7 +102,7 @@ export default function ProfilesPage() {
                       )}
                     </div>
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 px-3 py-1 text-sm font-bold text-purple-900">
-                      Age {getAge(profile.dateOfBirth)}
+                      Age {profile.age}
                     </div>
                   </div>
                   <p className="mt-4 text-lg font-bold">{profile.name}</p>
@@ -144,3 +132,5 @@ export default function ProfilesPage() {
     </div>
   );
 }
+
+    
