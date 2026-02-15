@@ -9,13 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const ZoZoKidLogo = () => (
   <svg
-    width="24"
-    height="24"
+    width="32"
+    height="32"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -37,95 +36,146 @@ export default function ParentDashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 font-body">
-      <header className="flex items-center justify-between bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-2 text-lg font-bold">
+    <div className="min-h-screen bg-background font-body">
+      <header className="flex items-center justify-between bg-card p-4 shadow-sm">
+        <div className="flex items-center gap-3">
           <ZoZoKidLogo />
-          <span>ZoZoKid</span>
+          <div>
+            <h1 className="font-bold text-foreground">Welcome, Saurav</h1>
+            <p className="text-sm text-muted-foreground">Parent Dashboard</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Users className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="rounded-full" asChild>
+          <Button variant="outline" className="rounded-full" asChild>
             <Link href="/profiles">
-              <LogOut className="h-5 w-5" />
+              <Users className="mr-2 h-4 w-4" />
+              Profiles
+            </Link>
+          </Button>
+          <Button variant="outline" className="rounded-full" asChild>
+            <Link href="/login">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
             </Link>
           </Button>
         </div>
       </header>
 
-      <main className="space-y-6 p-4">
-        <h1 className="text-xl font-bold text-gray-700">Parent Dashboard</h1>
+      <main className="space-y-8 p-4 md:p-8">
+        <div>
+          <h2 className="text-3xl font-bold text-foreground">
+            Dashboard Overview
+          </h2>
+          <p className="text-muted-foreground">
+            Manage your children's video experience
+          </p>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Content safety</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center gap-4">
-            <Progress value={90} className="h-2" />
-            <span className="text-lg font-bold text-green-600">90%</span>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Child Profiles
+              </CardTitle>
+              <Users className="h-4 w-4 text-pink-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold">1</div>
+              <p className="text-xs text-muted-foreground">Active profiles</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Approved Channels
+              </CardTitle>
+              <Video className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold">2</div>
+              <p className="text-xs text-muted-foreground">Trusted sources</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Safety Score</CardTitle>
+              <BarChart3 className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold text-green-500">98%</div>
+              <p className="text-xs text-muted-foreground">Content safety</p>
+            </CardContent>
+          </Card>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Child Profiles</CardTitle>
-            <CardDescription>Manage and monitor your children</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-14 w-14">
-                  {pippoProfileImage && (
-                    <AvatarImage
-                      src={pippoProfileImage.imageUrl}
-                      alt="Pippo"
-                      data-ai-hint={pippoProfileImage.imageHint}
-                    />
-                  )}
-                  <AvatarFallback>P</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-bold">Pippo</p>
-                  <p className="text-sm text-muted-foreground">Age: 4</p>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Child Profiles</CardTitle>
+              <CardDescription>
+                Manage and monitor your children
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-14 w-14">
+                    {pippoProfileImage && (
+                      <AvatarImage
+                        src={pippoProfileImage.imageUrl}
+                        alt="Pippo"
+                        data-ai-hint={pippoProfileImage.imageHint}
+                      />
+                    )}
+                    <AvatarFallback>P</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-bold">Pippo</p>
+                    <p className="text-sm text-muted-foreground">Age: 4</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    style={{ backgroundColor: '#FF4081' }}
+                    className="rounded-full px-5 text-white hover:bg-[#FF4081]/90"
+                  >
+                    Watch
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full"
+                  >
+                    <BarChart3 className="h-5 w-5" />
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  style={{ backgroundColor: '#FF4081' }}
-                  className="rounded-full px-5 text-white hover:bg-[#FF4081]/90"
-                >
-                  Watch
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <BarChart3 className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full rounded-full">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Another Child
-            </Button>
-          </CardContent>
-        </Card>
+              <Button variant="outline" className="w-full rounded-full">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Another Child
+              </Button>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Approved Channels</CardTitle>
-            <CardDescription>Trusted video sources for your kids</CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="flex justify-center p-6">
-              <Video className="h-16 w-16 text-gray-300" />
-            </div>
-            <p className="text-muted-foreground">No approved channels yet</p>
-            <Button className="mt-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 px-6 text-white">
-              <Plus className="mr-2 h-4 w-4" />
-              Add First Channel
-            </Button>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Approved Channels</CardTitle>
+              <CardDescription>
+                Trusted video sources for your kids
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="flex justify-center p-6">
+                <Video className="h-16 w-16 text-muted-foreground/30" />
+              </div>
+              <p className="text-muted-foreground">No approved channels yet</p>
+              <Button className="mt-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 px-6 text-white">
+                <Plus className="mr-2 h-4 w-4" />
+                Add First Channel
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );
