@@ -58,13 +58,21 @@ export default function ParentDashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="rounded-full" asChild>
+          <Button
+            variant="outline"
+            className="rounded-full text-foreground"
+            asChild
+          >
             <Link href="/profiles">
               <Users className="mr-2 h-4 w-4" />
               Profiles
             </Link>
           </Button>
-          <Button variant="outline" className="rounded-full" asChild>
+          <Button
+            variant="outline"
+            className="rounded-full text-foreground"
+            asChild
+          >
             <Link href="/login">
               <LogOut className="mr-2 h-4 w-4" />
               Logout
