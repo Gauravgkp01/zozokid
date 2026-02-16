@@ -4,9 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 
 type VideoReelItemProps = {
   videoId: string;
+  isPlaybackAllowed: boolean;
 };
 
-export function VideoReelItem({ videoId }: VideoReelItemProps) {
+export function VideoReelItem({
+  videoId,
+  isPlaybackAllowed,
+}: VideoReelItemProps) {
   const videoRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
 
@@ -45,7 +49,7 @@ export function VideoReelItem({ videoId }: VideoReelItemProps) {
       <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg bg-black">
         <iframe
           className="h-full w-full"
-          src={inView ? videoSrc : undefined}
+          src={inView && isPlaybackAllowed ? videoSrc : undefined}
           title="YouTube video player"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
