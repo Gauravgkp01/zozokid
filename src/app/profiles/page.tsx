@@ -7,6 +7,7 @@ import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking } f
 import { collection, doc, getDoc } from 'firebase/firestore';
 import Image from 'next/image';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 type ChildProfile = {
   id: string;
@@ -17,6 +18,7 @@ type ChildProfile = {
 
 export default function ProfilesPage() {
   const { user, firestore } = useFirebase();
+  const router = useRouter();
 
   // Effect to create parent document if it doesn't exist
   useEffect(() => {
@@ -46,6 +48,11 @@ export default function ProfilesPage() {
 
   const { data: profiles, isLoading } =
     useCollection<ChildProfile>(childProfilesQuery);
+
+  const handleProfileClick = () => {
+    sessionStorage.setItem('playbackAllowed', 'true');
+    router.push('/feed');
+  };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-[#8E44AD] to-[#3498DB] md:flex md:items-center md:justify-center md:p-4">
@@ -82,10 +89,10 @@ export default function ProfilesPage() {
             )}
             {profiles &&
               profiles.map((profile) => (
-                <Link
-                  href="/feed"
+                <div
                   key={profile.id}
-                  className="group text-center"
+                  className="group cursor-pointer text-center"
+                  onClick={handleProfileClick}
                 >
                   <div className="relative">
                     <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-transparent transition-transform group-hover:scale-105">
@@ -106,7 +113,7 @@ export default function ProfilesPage() {
                     </div>
                   </div>
                   <p className="mt-4 text-lg font-bold">{profile.name}</p>
-                </Link>
+                </div>
               ))}
             {!isLoading && (!profiles || profiles.length === 0) && (
               <p className="text-white/80">

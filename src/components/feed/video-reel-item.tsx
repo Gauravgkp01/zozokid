@@ -51,25 +51,29 @@ export function VideoReelItem({
   const playerId = `ytplayer-${videoId}-${Math.random().toString(36).substring(7)}`;
 
 
-  // This effect sets up the YouTube player once the API is ready and playback is allowed.
+  // This effect sets up the YouTube player once the API is ready.
+  // It now creates the player regardless of `isPlaybackAllowed`.
   useEffect(() => {
-    if (!isPlaybackAllowed) return;
-
     ensureYouTubeApi().then(() => {
-        if (!videoContainerRef.current) return;
-        
-        // Prevent creating multiple players
-        if(playerRef.current) return;
+        if (!videoContainerRef.current || playerRef.current) return;
 
         playerRef.current = new window.YT.Player(playerId, {
             videoId: videoId,
             playerVars: {
-                autoplay: 0, // We will control autoplay manually
+                autoplay: 0,
                 controls: 1,
                 modestbranding: 1,
                 rel: 0,
-                mute: 0,
+                mute: 1, // Player starts muted by default
             },
+            events: {
+              onReady: (event: any) => {
+                // If playback is allowed when the player is ready, unmute it.
+                if (isPlaybackAllowed) {
+                  event.target.unMute();
+                }
+              }
+            }
         });
     });
 
@@ -79,7 +83,8 @@ export function VideoReelItem({
             playerRef.current = null;
         }
     };
-  }, [isPlaybackAllowed, videoId, playerId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId, playerId]);
 
 
   // This effect handles observing the element and playing/pausing the video.
@@ -91,14 +96,17 @@ export function VideoReelItem({
       if (!player || typeof player.playVideo !== 'function') return;
 
       if (entry.isIntersecting) {
+        // When the video is visible, we ensure it's unmuted if allowed, and play.
+        if (isPlaybackAllowed) {
+            player.unMute();
+        }
         player.playVideo();
       } else {
         player.pauseVideo();
       }
     };
 
-    // We only start observing once playback is allowed.
-    if (isPlaybackAllowed && videoContainerRef.current) {
+    if (videoContainerRef.current) {
         observerRef.current = new IntersectionObserver(handleIntersection, {
             threshold: 0.75, // Play when 75% of the video is visible
         });
