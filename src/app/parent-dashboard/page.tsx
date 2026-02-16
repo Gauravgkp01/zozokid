@@ -27,6 +27,8 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { ContentPreferences } from '@/components/parent-dashboard/content-preferences';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -64,12 +66,20 @@ export type ChildProfile = {
     avatarUrl?: string;
     class: string;
     createdAt: string;
+    parentId: string;
+    updatedAt: string;
+    allowedChannelUrls: string[];
+    blockedChannelUrls: string[];
+    allowedContentTypes: string[];
+    blockedContentTypes: string[];
+    sharedWithTeacherIds: string[];
 };
 
 export default function ParentDashboardPage() {
     const { user, firestore } = useFirebase();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [profileToEdit, setProfileToEdit] = useState<ChildProfile | undefined>(undefined);
+    const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
     const { toast } = useToast();
     const [youtubeLink, setYoutubeLink] = useState('');
 
@@ -198,7 +208,7 @@ export default function ParentDashboardPage() {
           <Card className="bg-gray-50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                New Channels Approved
+                Videos in Queue
               </CardTitle>
               <Video className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -240,7 +250,14 @@ export default function ParentDashboardPage() {
                 </div>
             )}
             {!isLoading && profiles && profiles.map((profile) => (
-              <div key={profile.id} className="flex items-center justify-between rounded-lg border p-3">
+              <div 
+                key={profile.id} 
+                className={cn(
+                    "flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-all",
+                    selectedProfileId === profile.id && "ring-2 ring-primary bg-primary/10"
+                )}
+                onClick={() => setSelectedProfileId(profile.id)}
+              >
                 <div className="flex items-center gap-3">
                    {profile.avatarUrl && (
                         <Image
@@ -268,7 +285,7 @@ export default function ParentDashboardPage() {
                     variant="outline"
                     size="icon"
                     className="rounded-full"
-                    onClick={() => handleEditProfile(profile)}
+                    onClick={(e) => { e.stopPropagation(); handleEditProfile(profile);}}
                   >
                     <Pencil className="h-5 w-5" />
                   </Button>
@@ -294,28 +311,42 @@ export default function ParentDashboardPage() {
             </Button>
             </CardContent>
           </Card>
+          
+          <div className="space-y-6">
+            <Card className="bg-gray-50">
+              <CardHeader>
+                <CardTitle className="text-lg">Add Videos to Feed</CardTitle>
+                <CardDescription>
+                  Paste a YouTube link to add it to the feed for all children.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex w-full items-center space-x-2">
+                  <Input
+                    type="text"
+                    id="youtubeLink"
+                    placeholder="Paste YouTube link here"
+                    value={youtubeLink}
+                    onChange={(e) => setYoutubeLink(e.target.value)}
+                    className="flex-grow"
+                  />
+                  <Button onClick={handleAddVideo}>Add Video</Button>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-gray-50">
-            <CardHeader>
-              <CardTitle className="text-lg">Add Videos to Feed</CardTitle>
-              <CardDescription>
-                Paste a YouTube link to add it to the feed.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex w-full items-center space-x-2">
-                <Input
-                  type="text"
-                  id="youtubeLink"
-                  placeholder="Paste YouTube link here"
-                  value={youtubeLink}
-                  onChange={(e) => setYoutubeLink(e.target.value)}
-                  className="flex-grow"
-                />
-                <Button onClick={handleAddVideo}>Add Video</Button>
-              </div>
-            </CardContent>
-          </Card>
+             <Card className="bg-gray-50">
+                <CardHeader>
+                    <CardTitle className="text-lg">Content Preferences</CardTitle>
+                    <CardDescription>
+                    Select a child profile to manage their allowed channels and content categories.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ContentPreferences selectedProfileId={selectedProfileId} />
+                </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
       <ProfileFormDialog open={dialogOpen} onOpenChange={setDialogOpen} profile={profileToEdit} />

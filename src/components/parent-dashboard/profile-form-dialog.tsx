@@ -124,6 +124,12 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: ProfileFormDi
       const profileRef = doc(firestore, 'parents', user.uid, 'childProfiles', profile.id);
       const updatedData = {
         ...profileData,
+        // Carry over existing content settings
+        allowedChannelUrls: profile.allowedChannelUrls || [],
+        blockedChannelUrls: profile.blockedChannelUrls || [],
+        allowedContentTypes: profile.allowedContentTypes || [],
+        blockedContentTypes: profile.blockedContentTypes || [],
+        sharedWithTeacherIds: profile.sharedWithTeacherIds || [],
         createdAt: profile.createdAt // Preserve original creation date
       }
       setDocumentNonBlocking(profileRef, updatedData, { merge: true });
@@ -136,10 +142,11 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: ProfileFormDi
       // Add new profile
       const newProfileData = {
         ...profileData,
-        allowedChannelIds: [],
-        blockedChannelIds: [],
-        allowedContentTypeIds: [],
-        blockedContentTypeIds: [],
+        allowedChannelUrls: [],
+        blockedChannelUrls: [],
+        allowedContentTypes: [],
+        blockedContentTypes: [],
+        sharedWithTeacherIds: [],
         createdAt: new Date().toISOString(),
       }
       const childProfilesCollection = collection(
