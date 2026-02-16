@@ -23,13 +23,14 @@ export function VideoReelItem({ videoId }: VideoReelItemProps) {
       }
     );
 
-    if (videoRef.current) {
-      observer.observe(videoRef.current);
+    const currentRef = videoRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (videoRef.current) {
-        observer.unobserve(videoRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, []);
@@ -44,7 +45,7 @@ export function VideoReelItem({ videoId }: VideoReelItemProps) {
       <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg bg-black">
         <iframe
           className="h-full w-full"
-          src={inView ? videoSrc : ''}
+          src={inView ? videoSrc : undefined}
           title="YouTube video player"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
