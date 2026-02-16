@@ -154,22 +154,24 @@ export default function ParentDashboardPage() {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            size="icon"
             className="rounded-full border-gray-300 text-foreground"
             asChild
           >
             <Link href="/profiles">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Profiles</span>
+              <Users className="h-5 w-5" />
+              <span className="sr-only">Profiles</span>
             </Link>
           </Button>
           <Button
             variant="outline"
+            size="icon"
             className="rounded-full border-gray-300 text-foreground"
             asChild
           >
             <Link href="/login">
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <LogOut className="h-5 w-5" />
+              <span className="sr-only">Logout</span>
             </Link>
           </Button>
         </div>
