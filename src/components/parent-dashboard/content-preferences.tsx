@@ -4,16 +4,16 @@ import { useState, useEffect } from 'react';
 import { useFirebase, useDoc, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Loader2, X, Brain, Gamepad2, SpellCheck, Clapperboard, Plus } from 'lucide-react';
-import type { ChildProfile } from '@/app/parent-dashboard/page';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '../ui/badge';
 
-interface ContentPreferencesProps {
-  selectedProfileId: string | null;
+type Parent = {
+    id: string;
+    allowedChannelUrls?: string[];
+    allowedContentTypes?: string[];
 }
 
 const contentCategories = [
@@ -23,7 +23,7 @@ const contentCategories = [
   { id: 'Fun english learning', label: 'English Learning', icon: SpellCheck },
 ];
 
-export function ContentPreferences({ selectedProfileId }: ContentPreferencesProps) {
+export function ContentPreferences() {
   const { user, firestore } = useFirebase();
   const { toast } = useToast();
   
@@ -31,27 +31,22 @@ export function ContentPreferences({ selectedProfileId }: ContentPreferencesProp
   const [allowedChannels, setAllowedChannels] = useState<string[]>([]);
   const [allowedCategories, setAllowedCategories] = useState<string[]>([]);
 
-  const profileRef = useMemoFirebase(() => {
-    if (!user || !firestore || !selectedProfileId) return null;
-    return doc(firestore, 'parents', user.uid, 'childProfiles', selectedProfileId);
-  }, [user, firestore, selectedProfileId]);
+  const parentRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'parents', user.uid);
+  }, [user, firestore]);
 
-  const { data: profile, isLoading } = useDoc<ChildProfile>(profileRef);
+  const { data: parent, isLoading } = useDoc<Parent>(parentRef);
 
   useEffect(() => {
-    if (profile) {
-      setAllowedChannels(profile.allowedChannelUrls || []);
-      setAllowedCategories(profile.allowedContentTypes || []);
+    if (parent) {
+      setAllowedChannels(parent.allowedChannelUrls || []);
+      setAllowedCategories(parent.allowedContentTypes || []);
     } else {
-      // Clear settings when no profile is selected or data is loading
       setAllowedChannels([]);
       setAllowedCategories([]);
     }
-  }, [profile]);
-
-  if (!selectedProfileId) {
-    return <p className="text-sm text-muted-foreground text-center py-8">Select a child profile to get started.</p>;
-  }
+  }, [parent]);
 
   if (isLoading) {
     return (
@@ -61,14 +56,13 @@ export function ContentPreferences({ selectedProfileId }: ContentPreferencesProp
     );
   }
   
-  if (!profile) {
-    return <p className="text-sm text-destructive text-center py-8">Could not load profile data.</p>;
+  if (!parent) {
+    return <p className="text-sm text-destructive text-center py-8">Could not load parent data.</p>;
   }
 
   const handleAddChannel = () => {
     if (!newChannelUrl.trim()) return;
     
-    // Basic URL validation
     if (!newChannelUrl.startsWith('https://www.youtube.com/')) {
         toast({
             variant: 'destructive',
@@ -104,16 +98,16 @@ export function ContentPreferences({ selectedProfileId }: ContentPreferencesProp
   }
   
   const handleSaveChanges = () => {
+    if (!parentRef) return;
     const updatedData = {
-        ...profile,
         allowedChannelUrls: allowedChannels,
         allowedContentTypes: allowedCategories,
         updatedAt: new Date().toISOString(),
     };
-    setDocumentNonBlocking(profileRef, updatedData, { merge: true });
+    setDocumentNonBlocking(parentRef, updatedData, { merge: true });
     toast({
         title: 'Preferences Saved',
-        description: `Content settings for ${profile.name} have been updated.`,
+        description: `Your global content settings have been updated.`,
     })
   }
 

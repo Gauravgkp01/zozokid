@@ -68,10 +68,6 @@ export type ChildProfile = {
     createdAt: string;
     parentId: string;
     updatedAt: string;
-    allowedChannelUrls: string[];
-    blockedChannelUrls: string[];
-    allowedContentTypes: string[];
-    blockedContentTypes: string[];
     sharedWithTeacherIds: string[];
 };
 
@@ -79,7 +75,6 @@ export default function ParentDashboardPage() {
     const { user, firestore } = useFirebase();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [profileToEdit, setProfileToEdit] = useState<ChildProfile | undefined>(undefined);
-    const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
     const { toast } = useToast();
     const [youtubeLink, setYoutubeLink] = useState('');
 
@@ -252,11 +247,7 @@ export default function ParentDashboardPage() {
             {!isLoading && profiles && profiles.map((profile) => (
               <div 
                 key={profile.id} 
-                className={cn(
-                    "flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-all",
-                    selectedProfileId === profile.id && "ring-2 ring-primary bg-primary/10"
-                )}
-                onClick={() => setSelectedProfileId(profile.id)}
+                className="flex items-center justify-between rounded-lg border p-3"
               >
                 <div className="flex items-center gap-3">
                    {profile.avatarUrl && (
@@ -339,11 +330,11 @@ export default function ParentDashboardPage() {
                 <CardHeader>
                     <CardTitle className="text-lg">Content Preferences</CardTitle>
                     <CardDescription>
-                    Select a child profile to manage their allowed channels and content categories.
+                    Manage allowed channels and content categories for your account.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ContentPreferences selectedProfileId={selectedProfileId} />
+                    <ContentPreferences />
                 </CardContent>
             </Card>
           </div>

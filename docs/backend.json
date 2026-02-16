@@ -28,6 +28,21 @@
           "type": "string",
           "description": "Timestamp indicating when the parent profile was last updated.",
           "format": "date-time"
+        },
+        "allowedChannelUrls": {
+          "type": "array",
+          "description": "A global list of YouTube channel URLs that are explicitly allowed for all child profiles under this parent.",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "allowedContentTypes": {
+          "type": "array",
+          "description": "A global list of content category names that are explicitly allowed for all child profiles under this parent.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -154,36 +169,6 @@
           "type": "string",
           "description": "URL to the child's selected avatar or profile picture.",
           "format": "uri"
-        },
-        "allowedChannelUrls": {
-          "type": "array",
-          "description": "A list of YouTube channel URLs that are explicitly allowed for this child.",
-          "items": {
-            "type": "string",
-            "format": "uri"
-          }
-        },
-        "blockedChannelUrls": {
-          "type": "array",
-          "description": "A list of YouTube channel URLs that are explicitly blocked for this child.",
-          "items": {
-            "type": "string",
-            "format": "uri"
-          }
-        },
-        "allowedContentTypes": {
-          "type": "array",
-          "description": "A list of content category names that are explicitly allowed for this child.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "blockedContentTypes": {
-          "type": "array",
-          "description": "A list of content category names that are explicitly blocked for this child.",
-          "items": {
-            "type": "string"
-          }
         },
         "sharedWithTeacherIds": {
           "type": "array",
