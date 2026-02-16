@@ -1,66 +1,64 @@
-import { Reel } from '@/components/feed/reel';
+'use client';
 
-export default async function FeedPage() {
-  const videos = [
-    {
-      id: '5',
-      channel: '@elitechess',
-      title: 'He Sacrifices Everything!',
-      image: 'reel-chess',
-      likes: '1.2M',
-      comments: '1.4k',
-      shares: '2.5k',
-    },
-    {
-      id: '1',
-      channel: '@coolfacts',
-      title: 'Amazing Space Facts! #shorts',
-      image: 'reel-space',
-      likes: '12.3k',
-      comments: '234',
-      shares: '102',
-    },
-    {
-      id: '2',
-      channel: '@legomaster',
-      title: 'Building a giant LEGO car',
-      image: 'reel-lego',
-      likes: '45.1k',
-      comments: '1.2k',
-      shares: '876',
-    },
-    {
-      id: '3',
-      channel: '@artforkids',
-      title: 'How to draw a cartoon dog',
-      image: 'reel-drawing',
-      likes: '9.8k',
-      comments: '150',
-      shares: '50',
-    },
-    {
-      id: '4',
-      channel: '@minecrafter',
-      title: 'My new Minecraft base tour',
-      image: 'reel-minecraft',
-      likes: '102k',
-      comments: '5.6k',
-      shares: '2.1k',
-    },
-  ];
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
+
+type Video = {
+  id: string; // This will be the document id, which is the youtube video id
+  createdAt: string;
+};
+
+export default function FeedPage() {
+  const { user, firestore } = useFirebase();
+
+  const videosQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return query(
+      collection(firestore, 'parents', user.uid, 'videos'),
+      orderBy('createdAt', 'desc')
+    );
+  }, [user, firestore]);
+
+  const { data: videos, isLoading } = useCollection<Video>(videosQuery);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-black">
+        <Loader2 className="h-16 w-16 animate-spin text-white" />
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-full snap-y snap-mandatory overflow-y-auto bg-black">
-      {videos.map((video) => (
-        <div
-          key={video.id}
-          className="flex h-screen w-full items-center justify-center snap-start"
-        >
-          <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg">
-            <Reel video={video} />
+      {videos && videos.length > 0 ? (
+        videos.map((video) => (
+          <div
+            key={video.id}
+            className="flex h-screen w-full items-center justify-center snap-start"
+          >
+            <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg bg-black">
+              <iframe
+                className="h-full w-full"
+                src={`https://www.youtube.com/embed/${video.id}?autoplay=0&controls=1&modestbranding=1&rel=0`}
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="flex h-screen w-full items-center justify-center text-center text-white">
+          <div>
+            <h2 className="text-2xl font-bold">Your Feed is Empty</h2>
+            <p className="mt-2 text-muted-foreground">
+              Go to the Parent Dashboard to add some videos!
+            </p>
           </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }

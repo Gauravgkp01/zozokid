@@ -91,6 +91,14 @@ service cloud.firestore {
     function hasValidClassDataOnUpdate() {
         return request.resource.data.teacherId == resource.data.teacherId;
     }
+    
+    function hasValidVideoDataOnCreate(parentId) {
+      return request.resource.data.parentId == parentId;
+    }
+    
+    function hasValidVideoDataOnUpdate() {
+        return request.resource.data.parentId == resource.data.parentId;
+    }
 
     /**
      * @description Manages parent user profiles.
@@ -122,6 +130,17 @@ service cloud.firestore {
           allow update: if isExistingOwner(parentId) && hasValidWatchEventDataOnUpdate();
           allow delete: if isExistingOwner(parentId);
         }
+      }
+      
+      /**
+       * @description Manages the collection of parent-approved videos.
+       */
+      match /videos/{videoId} {
+        allow get: if isOwner(parentId);
+        allow list: if isOwner(parentId);
+        allow create: if isOwner(parentId) && hasValidVideoDataOnCreate(parentId);
+        allow update: if isOwner(parentId) && hasValidVideoDataOnUpdate();
+        allow delete: if isOwner(parentId);
       }
     }
     

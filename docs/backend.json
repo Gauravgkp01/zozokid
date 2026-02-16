@@ -362,6 +362,26 @@
         "watchDurationSeconds",
         "watchedAt"
       ]
+    },
+    "Video": {
+      "title": "Video",
+      "type": "object",
+      "description": "Represents a YouTube video added by a parent for their children to watch.",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "The UID of the parent who added this video."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp indicating when the video was added."
+        }
+      },
+      "required": [
+        "parentId",
+        "createdAt"
+      ]
     }
   },
   "auth": {
@@ -410,6 +430,16 @@
             "$ref": "#/backend/entities/ChildProfile"
           },
           "description": "Contains child profiles created by a specific parent. The `parentId` in the document matches the parent in the path, enabling authorization independence without `get()` calls. Includes denormalized 'parentId' for authorization independence."
+        }
+      },
+      {
+        "path": "/parents/{parentId}/videos/{videoId}",
+        "definition": {
+          "entityName": "Video",
+          "schema": {
+            "$ref": "#/backend/entities/Video"
+          },
+          "description": "A collection of YouTube videos approved by a parent. The document ID is the YouTube video ID."
         }
       },
       {

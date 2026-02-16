@@ -21,8 +21,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ProfileFormDialog } from '@/components/parent-dashboard/profile-form-dialog';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
@@ -72,7 +72,6 @@ export default function ParentDashboardPage() {
     const [profileToEdit, setProfileToEdit] = useState<ChildProfile | undefined>(undefined);
     const { toast } = useToast();
     const [youtubeLink, setYoutubeLink] = useState('');
-    const [videoIds, setVideoIds] = useState<string[]>([]);
 
 
     const childProfilesQuery = useMemoFirebase(() => {
@@ -99,6 +98,15 @@ export default function ParentDashboardPage() {
     };
     
     const handleAddVideo = () => {
+        if (!user || !firestore) {
+            toast({
+              variant: 'destructive',
+              title: 'Not logged in',
+              description: 'You must be logged in to add videos.',
+            });
+            return;
+        }
+
         const videoId = extractVideoID(youtubeLink);
     
         if (!videoId) {
@@ -110,7 +118,19 @@ export default function ParentDashboardPage() {
           return;
         }
     
-        setVideoIds((prevIds) => [videoId, ...prevIds]);
+        const videoRef = doc(firestore, 'parents', user.uid, 'videos', videoId);
+        const videoData = {
+            parentId: user.uid,
+            createdAt: new Date().toISOString(),
+        };
+
+        setDocumentNonBlocking(videoRef, videoData, { merge: true });
+
+        toast({
+            title: 'Video Added!',
+            description: 'The video has been added to the feed.',
+        });
+
         setYoutubeLink('');
     };
     
@@ -277,7 +297,7 @@ export default function ParentDashboardPage() {
 
           <Card className="bg-gray-50">
             <CardHeader>
-              <CardTitle className="text-lg">Add & View Videos</CardTitle>
+              <CardTitle className="text-lg">Add Videos to Feed</CardTitle>
               <CardDescription>
                 Paste a YouTube link to add it to the feed.
               </CardDescription>
@@ -293,20 +313,6 @@ export default function ParentDashboardPage() {
                   className="flex-grow"
                 />
                 <Button onClick={handleAddVideo}>Add Video</Button>
-              </div>
-
-              <div id="feed" className="mt-4 space-y-4">
-                {videoIds.map((videoId) => (
-                    <div key={videoId} className="aspect-video">
-                        <iframe
-                            className="h-full w-full rounded-lg"
-                            src={`https://www.youtube.com/embed/${videoId}`}
-                            title="Embedded YouTube video"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        ></iframe>
-                    </div>
-                ))}
               </div>
             </CardContent>
           </Card>
