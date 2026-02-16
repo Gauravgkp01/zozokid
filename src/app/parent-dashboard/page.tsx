@@ -136,7 +136,7 @@ export default function ParentDashboardPage() {
     
   return (
     <div className="light min-h-screen bg-white font-body text-foreground">
-      <header className="flex items-center justify-between bg-card p-4 shadow-sm">
+      <header className="flex flex-wrap items-center justify-between gap-4 bg-card p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <ZoZoKidLogo />
           <div>
@@ -153,8 +153,8 @@ export default function ParentDashboardPage() {
             asChild
           >
             <Link href="/profiles">
-              <Users className="mr-2 h-4 w-4" />
-              Profiles
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Profiles</span>
             </Link>
           </Button>
           <Button
@@ -163,8 +163,8 @@ export default function ParentDashboardPage() {
             asChild
           >
             <Link href="/login">
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Logout</span>
             </Link>
           </Button>
         </div>
@@ -322,5 +322,3 @@ export default function ParentDashboardPage() {
     </div>
   );
 }
-
-    
