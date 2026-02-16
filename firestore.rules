@@ -133,9 +133,9 @@ service cloud.firestore {
       }
       
       /**
-       * @description Manages the collection of parent-approved videos.
+       * @description Manages the queue of parent-approved videos.
        */
-      match /videos/{videoId} {
+      match /videoQueue/{videoId} {
         allow get: if isOwner(parentId);
         allow list: if isOwner(parentId);
         allow create: if isOwner(parentId) && hasValidVideoDataOnCreate(parentId);
@@ -189,3 +189,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

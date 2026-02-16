@@ -118,7 +118,7 @@ export default function ParentDashboardPage() {
           return;
         }
     
-        const videoRef = doc(firestore, 'parents', user.uid, 'videos', videoId);
+        const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', videoId);
         const videoData = {
             parentId: user.uid,
             createdAt: new Date().toISOString(),
@@ -322,3 +322,5 @@ export default function ParentDashboardPage() {
     </div>
   );
 }
+
+    

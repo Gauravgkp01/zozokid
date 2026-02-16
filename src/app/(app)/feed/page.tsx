@@ -15,7 +15,7 @@ export default function FeedPage() {
   const videosQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
-      collection(firestore, 'parents', user.uid, 'videos'),
+      collection(firestore, 'parents', user.uid, 'videoQueue'),
       orderBy('createdAt', 'desc')
     );
   }, [user, firestore]);
@@ -62,3 +62,5 @@ export default function FeedPage() {
     </div>
   );
 }
+
+    
