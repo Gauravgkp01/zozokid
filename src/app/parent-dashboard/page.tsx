@@ -25,6 +25,8 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import Image from 'next/image';
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -68,6 +70,9 @@ export default function ParentDashboardPage() {
     const { user, firestore } = useFirebase();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [profileToEdit, setProfileToEdit] = useState<ChildProfile | undefined>(undefined);
+    const { toast } = useToast();
+    const [youtubeLink, setYoutubeLink] = useState('');
+    const [videoIds, setVideoIds] = useState<string[]>([]);
 
 
     const childProfilesQuery = useMemoFirebase(() => {
@@ -86,6 +91,28 @@ export default function ParentDashboardPage() {
       setProfileToEdit(profile);
       setDialogOpen(true);
     }
+
+    const extractVideoID = (url: string) => {
+      const regex = /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([^&?/]+)/;
+      const match = url.match(regex);
+      return match ? match[1] : null;
+    };
+    
+    const handleAddVideo = () => {
+        const videoId = extractVideoID(youtubeLink);
+    
+        if (!videoId) {
+          toast({
+            variant: 'destructive',
+            title: 'Invalid YouTube link',
+            description: 'Please provide a valid YouTube video link.',
+          });
+          return;
+        }
+    
+        setVideoIds((prevIds) => [videoId, ...prevIds]);
+        setYoutubeLink('');
+    };
     
   return (
     <div className="light min-h-screen bg-white font-body text-foreground">
@@ -250,20 +277,37 @@ export default function ParentDashboardPage() {
 
           <Card className="bg-gray-50">
             <CardHeader>
-              <CardTitle className="text-lg">Approved Channels</CardTitle>
+              <CardTitle className="text-lg">Add & View Videos</CardTitle>
               <CardDescription>
-                Trusted video sources for your kids
+                Paste a YouTube link to add it to the feed.
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
-              <div className="flex justify-center p-6">
-                <Video className="h-16 w-16 text-muted-foreground/30" />
+            <CardContent>
+              <div className="flex w-full items-center space-x-2">
+                <Input
+                  type="text"
+                  id="youtubeLink"
+                  placeholder="Paste YouTube link here"
+                  value={youtubeLink}
+                  onChange={(e) => setYoutubeLink(e.target.value)}
+                  className="flex-grow"
+                />
+                <Button onClick={handleAddVideo}>Add Video</Button>
               </div>
-              <p className="text-muted-foreground">No approved channels yet</p>
-              <Button className="mt-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 px-6 text-white">
-                <Plus className="mr-2 h-4 w-4" />
-                Add First Channel
-              </Button>
+
+              <div id="feed" className="mt-4 space-y-4">
+                {videoIds.map((videoId) => (
+                    <div key={videoId} className="aspect-video">
+                        <iframe
+                            className="h-full w-full rounded-lg"
+                            src={`https://www.youtube.com/embed/${videoId}`}
+                            title="Embedded YouTube video"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
