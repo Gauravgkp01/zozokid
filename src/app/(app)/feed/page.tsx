@@ -41,7 +41,7 @@ export default function FeedPage() {
             <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg bg-black">
               <iframe
                 className="h-full w-full"
-                src={`https://www.youtube.com/embed/${video.id}?autoplay=0&controls=1&modestbranding=1&rel=0`}
+                src={`https://www.youtube.com/embed/${video.id}?autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`}
                 title="YouTube video player"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
@@ -62,5 +62,3 @@ export default function FeedPage() {
     </div>
   );
 }
-
-    
