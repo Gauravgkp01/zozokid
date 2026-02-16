@@ -35,7 +35,7 @@ export function VideoReelItem({ videoId }: VideoReelItemProps) {
     };
   }, []);
 
-  const videoSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`;
+  const videoSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&controls=1&modestbranding=1&rel=0`;
 
   return (
     <div
