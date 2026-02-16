@@ -1,59 +1,126 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+
+// Make YT and YT.Player available in the window scope for TypeScript
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady?: () => void;
+    YT?: {
+      Player: new (id: string, options: any) => any;
+      PlayerState: { [key: string]: number };
+    };
+  }
+}
 
 type VideoReelItemProps = {
   videoId: string;
   isPlaybackAllowed: boolean;
 };
 
+// A global promise to ensure the YouTube IFrame API script is loaded and ready.
+let apiReadyPromise: Promise<void> | null = null;
+const ensureYouTubeApi = () => {
+  if (!apiReadyPromise) {
+    apiReadyPromise = new Promise((resolve) => {
+      if (typeof window !== 'undefined' && window.YT && window.YT.Player) {
+        resolve();
+      } else if (typeof window !== 'undefined') {
+        // If the API is not ready, we define the callback that the script will call.
+        const originalCallback = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+          if (originalCallback) {
+            originalCallback();
+          }
+          resolve();
+        };
+      }
+    });
+  }
+  return apiReadyPromise;
+};
+
+
 export function VideoReelItem({
   videoId,
   isPlaybackAllowed,
 }: VideoReelItemProps) {
-  const videoRef = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const playerId = `ytplayer-${videoId}-${Math.random().toString(36).substring(7)}`;
 
+
+  // This effect sets up the YouTube player once the API is ready and playback is allowed.
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // Update our state when observer callback fires
-        setInView(entry.isIntersecting);
-      },
-      {
-        root: null, // viewport
-        rootMargin: '0px',
-        threshold: 0.5, // 50% of item has to be visible
-      }
-    );
+    if (!isPlaybackAllowed) return;
 
-    const currentRef = videoRef.current;
-    if (currentRef) {
-      observer.observe(currentRef);
+    ensureYouTubeApi().then(() => {
+        if (!videoContainerRef.current) return;
+        
+        // Prevent creating multiple players
+        if(playerRef.current) return;
+
+        playerRef.current = new window.YT.Player(playerId, {
+            videoId: videoId,
+            playerVars: {
+                autoplay: 0, // We will control autoplay manually
+                controls: 1,
+                modestbranding: 1,
+                rel: 0,
+                mute: 0,
+            },
+        });
+    });
+
+    return () => {
+        if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+            playerRef.current.destroy();
+            playerRef.current = null;
+        }
+    };
+  }, [isPlaybackAllowed, videoId, playerId]);
+
+
+  // This effect handles observing the element and playing/pausing the video.
+  useEffect(() => {
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      const entry = entries[0];
+      const player = playerRef.current;
+
+      if (!player || typeof player.playVideo !== 'function') return;
+
+      if (entry.isIntersecting) {
+        player.playVideo();
+      } else {
+        player.pauseVideo();
+      }
+    };
+
+    // We only start observing once playback is allowed.
+    if (isPlaybackAllowed && videoContainerRef.current) {
+        observerRef.current = new IntersectionObserver(handleIntersection, {
+            threshold: 0.75, // Play when 75% of the video is visible
+        });
+        observerRef.current.observe(videoContainerRef.current);
     }
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+            observerRef.current = null;
+        }
     };
-  }, []);
+  }, [isPlaybackAllowed]);
 
-  const videoSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&controls=1&modestbranding=1&rel=0`;
 
   return (
     <div
-      ref={videoRef}
+      ref={videoContainerRef}
       className="flex h-screen w-full snap-start items-center justify-center"
     >
       <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg bg-black">
-        <iframe
-          className="h-full w-full"
-          src={inView && isPlaybackAllowed ? videoSrc : undefined}
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>
+        <div id={playerId} className="h-full w-full" />
       </div>
     </div>
   );

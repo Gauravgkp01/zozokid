@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { AuthHandler } from '@/components/auth/auth-handler';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'ZoZoKid',
@@ -28,12 +29,13 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased">
+      <body>
         <FirebaseClientProvider>
           <AuthHandler />
           {children}
         </FirebaseClientProvider>
         <Toaster />
+        <Script src="https://www.youtube.com/iframe_api" strategy="lazyOnload" />
       </body>
     </html>
   );
