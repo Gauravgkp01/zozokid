@@ -111,6 +111,43 @@
             ]
           }
         },
+        "content": {
+          "type": "array",
+          "description": "A list of content (videos or channels) that have been added to this class by the teacher.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "video",
+                  "channel"
+                ]
+              },
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "thumbnailUrl": {
+                "type": "string",
+                "format": "uri"
+              },
+              "addedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "type",
+              "id",
+              "title",
+              "thumbnailUrl",
+              "addedAt"
+            ]
+          }
+        },
         "createdAt": {
           "type": "string",
           "description": "Timestamp indicating when the class was created.",

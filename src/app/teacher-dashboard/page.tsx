@@ -27,12 +27,21 @@ import {
   where,
 } from 'firebase/firestore';
 
+export type AddedContent = {
+  type: 'video' | 'channel';
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+  addedAt: string;
+};
+
 export type Class = {
   id: string;
   name: string;
   teacherId: string;
   avatarUrl?: string;
   students: { studentId: string; parentId: string }[];
+  content?: AddedContent[];
 };
 
 export default function TeacherDashboardPage() {

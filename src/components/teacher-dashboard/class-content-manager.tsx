@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, Search, Video, PlusCircle, Link as LinkIcon } from 'lucide-react';
 import { useFirebase } from '@/firebase';
-import { doc, writeBatch } from 'firebase/firestore';
+import { doc, writeBatch, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Class } from '@/app/teacher-dashboard/page';
 
@@ -102,7 +102,17 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
     const handleAddVideo = async (video: YoutubeVideoResult) => {
         setAddingVideoId(video.id);
         const success = await handleBatchAddVideos([video]);
-        if (success) {
+        if (success && firestore) {
+            const classRef = doc(firestore, 'classes', classData.id);
+            await updateDoc(classRef, {
+                content: arrayUnion({
+                    type: 'video',
+                    id: video.id,
+                    title: video.title,
+                    thumbnailUrl: video.thumbnailUrl,
+                    addedAt: new Date().toISOString()
+                })
+            });
             toast({
                 title: 'Video Added!',
                 description: `"${video.title}" was added to the feed for all ${classData.students.length} student(s).`,
@@ -132,7 +142,17 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
             
             const success = await handleBatchAddVideos(videos);
 
-            if (success) {
+            if (success && firestore) {
+                 const classRef = doc(firestore, 'classes', classData.id);
+                 await updateDoc(classRef, {
+                     content: arrayUnion({
+                         type: 'channel',
+                         id: channel.id,
+                         title: channel.title,
+                         thumbnailUrl: channel.thumbnailUrl,
+                         addedAt: new Date().toISOString()
+                     })
+                 });
                  toast({
                     title: 'Channel Content Added!',
                     description: `${videos.length} videos from ${channel.title} were added to the feed for all ${classData.students.length} student(s).`,
@@ -174,7 +194,17 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
             const videoDetails = await getVideoDetails(videoId);
             const success = await handleBatchAddVideos([videoDetails]);
 
-            if (success) {
+            if (success && firestore) {
+                const classRef = doc(firestore, 'classes', classData.id);
+                await updateDoc(classRef, {
+                    content: arrayUnion({
+                        type: 'video',
+                        id: videoDetails.id,
+                        title: videoDetails.title,
+                        thumbnailUrl: videoDetails.thumbnailUrl,
+                        addedAt: new Date().toISOString()
+                    })
+                });
                 toast({
                     title: 'Video Added!',
                     description: `The video has been added to the feed for all ${classData.students.length} student(s).`,
@@ -195,109 +225,136 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">Add Video by Link</CardTitle>
-                    <CardDescription>
-                        Paste a YouTube link to add it to the feed for all students in this class.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex w-full items-center space-x-2">
-                        <Input
-                            type="text"
-                            placeholder="Paste YouTube link here"
-                            value={youtubeLink}
-                            onChange={(e) => setYoutubeLink(e.target.value)}
-                            className="flex-grow"
-                        />
-                        <Button onClick={handleAddVideoByLink} disabled={isAddingByLink}>
-                            {isAddingByLink ? <Loader2 className="h-4 w-4 animate-spin"/> : <LinkIcon className="h-4 w-4" /> }
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">Discover Content for Class</CardTitle>
-                    <CardDescription>
-                        Search for channels or videos to add to the feed for all students.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex w-full items-center space-x-2">
-                        <Input
-                            type="text"
-                            placeholder="Search YouTube..."
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                        <Button onClick={handleSearch} disabled={isSearching}>
-                            {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                            <span className="sr-only">Search</span>
-                        </Button>
-                    </div>
-
-                    {isSearching && (
-                        <div className="mt-6 flex justify-center">
-                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Add Video by Link</CardTitle>
+                        <CardDescription>
+                            Paste a YouTube link to add it to the feed for all students in this class.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex w-full items-center space-x-2">
+                            <Input
+                                type="text"
+                                placeholder="Paste YouTube link here"
+                                value={youtubeLink}
+                                onChange={(e) => setYoutubeLink(e.target.value)}
+                                className="flex-grow"
+                            />
+                            <Button onClick={handleAddVideoByLink} disabled={isAddingByLink}>
+                                {isAddingByLink ? <Loader2 className="h-4 w-4 animate-spin"/> : <LinkIcon className="h-4 w-4" /> }
+                            </Button>
                         </div>
-                    )}
-                    
-                    {results && (
-                        <div className="mt-6 space-y-6 max-h-96 overflow-y-auto pr-2">
-                            {results.channels.length > 0 && (
-                                <div>
-                                    <h3 className="text-md font-semibold mb-2">Channels</h3>
-                                    <div className="space-y-2">
-                                        {results.channels.map(channel => (
-                                            <div key={channel.id} className="flex items-center gap-3 rounded-lg border p-2">
-                                                <Image src={channel.thumbnailUrl} alt={channel.title} width={40} height={40} className="rounded-full" />
-                                                <div className="flex-1">
-                                                    <p className="font-bold truncate">{channel.title}</p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Discover Content for Class</CardTitle>
+                        <CardDescription>
+                            Search for channels or videos to add to the feed for all students.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex w-full items-center space-x-2">
+                            <Input
+                                type="text"
+                                placeholder="Search YouTube..."
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            />
+                            <Button onClick={handleSearch} disabled={isSearching}>
+                                {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                                <span className="sr-only">Search</span>
+                            </Button>
+                        </div>
+
+                        {isSearching && (
+                            <div className="mt-6 flex justify-center">
+                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                            </div>
+                        )}
+                        
+                        {results && (
+                            <div className="mt-6 space-y-6 max-h-96 overflow-y-auto pr-2">
+                                {results.channels.length > 0 && (
+                                    <div>
+                                        <h3 className="text-md font-semibold mb-2">Channels</h3>
+                                        <div className="space-y-2">
+                                            {results.channels.map(channel => (
+                                                <div key={channel.id} className="flex items-center gap-3 rounded-lg border p-2">
+                                                    <Image src={channel.thumbnailUrl} alt={channel.title} width={40} height={40} className="rounded-full" />
+                                                    <div className="flex-1">
+                                                        <p className="font-bold truncate">{channel.title}</p>
+                                                    </div>
+                                                    <Button size="sm" onClick={() => handleAddChannel(channel)} disabled={addingChannelId === channel.id}>
+                                                        {addingChannelId === channel.id ? (
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <PlusCircle className="mr-2 h-4 w-4" />
+                                                        )}
+                                                        Add Channel Shorts
+                                                    </Button>
                                                 </div>
-                                                <Button size="sm" onClick={() => handleAddChannel(channel)} disabled={addingChannelId === channel.id}>
-                                                    {addingChannelId === channel.id ? (
-                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    ) : (
-                                                        <PlusCircle className="mr-2 h-4 w-4" />
-                                                    )}
-                                                    Add Channel Shorts
-                                                </Button>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {results.videos.length > 0 && (
-                                <div>
-                                    <h3 className="text-md font-semibold mb-2">Videos</h3>
-                                    <div className="space-y-2">
-                                        {results.videos.map(video => (
-                                            <div key={video.id} className="flex items-center gap-3 rounded-lg border p-2">
-                                                 <Image src={video.thumbnailUrl} alt={video.title} width={64} height={36} className="rounded-md object-cover" />
-                                                 <div className="flex-1">
-                                                    <p className="font-bold text-sm truncate">{video.title}</p>
-                                                    <p className="text-xs text-muted-foreground">{video.channelTitle}</p>
-                                                 </div>
-                                                <Button size="sm" onClick={() => handleAddVideo(video)} disabled={addingVideoId === video.id}>
-                                                    {addingVideoId === video.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Video className="mr-2 h-4 w-4" />}
-                                                    Add
-                                                </Button>
-                                            </div>
-                                        ))}
+                                {results.videos.length > 0 && (
+                                    <div>
+                                        <h3 className="text-md font-semibold mb-2">Videos</h3>
+                                        <div className="space-y-2">
+                                            {results.videos.map(video => (
+                                                <div key={video.id} className="flex items-center gap-3 rounded-lg border p-2">
+                                                     <Image src={video.thumbnailUrl} alt={video.title} width={64} height={36} className="rounded-md object-cover" />
+                                                     <div className="flex-1">
+                                                        <p className="font-bold text-sm truncate">{video.title}</p>
+                                                        <p className="text-xs text-muted-foreground">{video.channelTitle}</p>
+                                                     </div>
+                                                    <Button size="sm" onClick={() => handleAddVideo(video)} disabled={addingVideoId === video.id}>
+                                                        {addingVideoId === video.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Video className="mr-2 h-4 w-4" />}
+                                                        Add
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                            {results.channels.length === 0 && results.videos.length === 0 && (
-                                <p className="text-center text-muted-foreground mt-6">No results found.</p>
-                            )}
-                        </div>
-                    )}
+                                )}
+                                {results.channels.length === 0 && results.videos.length === 0 && (
+                                    <p className="text-center text-muted-foreground mt-6">No results found.</p>
+                                )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Recently Added Content</CardTitle>
+                    <CardDescription>A log of recently added content to this class.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                        {classData.content && classData.content.length > 0 ? (
+                            [...classData.content]
+                                .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
+                                .map((item, index) => (
+                                    <div key={`${item.id}-${index}`} className="flex items-center gap-3 rounded-lg border bg-background p-2">
+                                        <Image src={item.thumbnailUrl} alt={item.title} width={48} height={48} className="rounded-md object-cover" />
+                                        <div className="flex-1 overflow-hidden">
+                                            <p className="font-bold text-sm truncate">{item.title}</p>
+                                            <p className="text-xs text-muted-foreground capitalize">{item.type}</p>
+                                        </div>
+                                    </div>
+                                ))
+                        ) : (
+                            <p className="text-center text-muted-foreground text-sm py-8">No content has been added to this class yet.</p>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         </div>
