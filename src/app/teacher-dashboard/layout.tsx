@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export default function TeacherDashboardLayout({
   children,
@@ -13,9 +14,12 @@ export default function TeacherDashboardLayout({
   children: React.ReactNode;
 }) {
   const auth = useAuth();
+  const router = useRouter();
   const handleLogout = () => {
     if (auth) {
-      signOut(auth);
+      signOut(auth).then(() => {
+        router.push('/login');
+      });
     }
   };
 
