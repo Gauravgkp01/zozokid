@@ -5,16 +5,21 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import { VideoReelItem } from '@/components/feed/video-reel-item';
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 
-type Video = {
+export type Video = {
   id: string; // This will be the document id, which is the youtube video id
+  parentId: string;
   createdAt: string;
   title: string;
   thumbnailUrl: string;
+  channelId: string;
   channelTitle: string;
 };
 
 export default function FeedPage() {
+  const params = useParams();
+  const childId = params.childId as string;
   const { user, firestore } = useFirebase();
   const [isPlaybackAllowed, setIsPlaybackAllowed] = useState(false);
 
@@ -45,11 +50,13 @@ export default function FeedPage() {
 
   return (
     <div className="relative h-screen w-full snap-y snap-mandatory overflow-y-auto bg-black">
-      {videos && videos.length > 0 ? (
+      {videos && videos.length > 0 && user ? (
         videos.map((video) => (
           <VideoReelItem
             key={video.id}
-            videoId={video.id}
+            video={video}
+            childId={childId}
+            parentId={user.uid}
             isPlaybackAllowed={isPlaybackAllowed}
           />
         ))

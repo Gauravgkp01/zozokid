@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { collection } from 'firebase/firestore';
+import { useFirebase, addDocumentNonBlocking } from '@/firebase';
 
 // Make YT and YT.Player available in the window scope for TypeScript
 declare global {
@@ -13,8 +15,20 @@ declare global {
   }
 }
 
+type Video = {
+  id: string; // youtube video id
+  parentId: string;
+  createdAt: string;
+  title: string;
+  thumbnailUrl: string;
+  channelId: string;
+  channelTitle: string;
+};
+
 type VideoReelItemProps = {
-  videoId: string;
+  video: Video;
+  childId: string;
+  parentId: string;
   isPlaybackAllowed: boolean;
 };
 
@@ -42,17 +56,61 @@ const ensureYouTubeApi = () => {
 
 
 export function VideoReelItem({
-  videoId,
+  video,
+  childId,
+  parentId,
   isPlaybackAllowed,
 }: VideoReelItemProps) {
+  const { firestore } = useFirebase();
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  
+  const videoId = video.id;
   const playerId = `ytplayer-${videoId}-${Math.random().toString(36).substring(7)}`;
 
+  const onPlayerStateChange = (event: any) => {
+    if (!firestore || !childId || !parentId) return;
 
-  // This effect sets up the YouTube player once the API is ready.
-  // It now creates the player regardless of `isPlaybackAllowed`.
+    // Video Started Playing
+    if (event.data === window.YT.PlayerState.PLAYING) {
+      if (startTimeRef.current === null) { // Only set if it's not already set
+        startTimeRef.current = Date.now();
+      }
+    }
+    
+    const stateIsEnded = event.data === window.YT.PlayerState.ENDED;
+    const stateIsPaused = event.data === window.YT.PlayerState.PAUSED;
+    
+    // Video Paused or Ended
+    if ((stateIsEnded || stateIsPaused) && startTimeRef.current) {
+      const watchDurationMillis = Date.now() - startTimeRef.current;
+      const watchDurationSeconds = Math.round(watchDurationMillis / 1000);
+      startTimeRef.current = null; // Reset start time
+
+      // Only log if watched for more than 5 seconds
+      if (watchDurationSeconds > 5) {
+        const watchEventsRef = collection(firestore, 'parents', parentId, 'childProfiles', childId, 'videoWatchEvents');
+        const eventData = {
+            parentId: parentId,
+            childProfileId: childId,
+            youtubeVideoId: video.id,
+            channelId: video.channelId,
+            channelTitle: video.channelTitle,
+            watchDurationSeconds: stateIsEnded ? Math.round(playerRef.current?.getDuration() || watchDurationSeconds) : watchDurationSeconds,
+            watchedAt: new Date().toISOString(),
+            videoTitle: video.title,
+            videoThumbnailUrl: video.thumbnailUrl,
+            videoUrl: `https://www.youtube.com/watch?v=${video.id}`,
+            contentTypeId: 'uncategorized'
+        };
+        addDocumentNonBlocking(watchEventsRef, eventData);
+      }
+    }
+  };
+
+
   useEffect(() => {
     ensureYouTubeApi().then(() => {
         if (!videoContainerRef.current || playerRef.current) return;
@@ -68,11 +126,11 @@ export function VideoReelItem({
             },
             events: {
               onReady: (event: any) => {
-                // If playback is allowed when the player is ready, unmute it.
                 if (isPlaybackAllowed) {
                   event.target.unMute();
                 }
-              }
+              },
+              onStateChange: onPlayerStateChange,
             }
         });
     });
@@ -87,7 +145,6 @@ export function VideoReelItem({
   }, [videoId, playerId]);
 
 
-  // This effect handles observing the element and playing/pausing the video.
   useEffect(() => {
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
       const entry = entries[0];
@@ -96,12 +153,12 @@ export function VideoReelItem({
       if (!player || typeof player.playVideo !== 'function') return;
 
       if (entry.isIntersecting) {
-        // When the video is visible, we ensure it's unmuted if allowed, and play.
         if (isPlaybackAllowed) {
             player.unMute();
         }
         player.playVideo();
       } else {
+        // This will trigger the PAUSED state change and log the event
         player.pauseVideo();
       }
     };

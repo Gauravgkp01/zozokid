@@ -6,20 +6,19 @@ import {
   Clock,
   Film,
   Tv,
+  Eye,
 } from 'lucide-react';
 import {
   Bar,
   BarChart as BarChartComponent,
   CartesianGrid,
-  Legend,
-  Pie,
-  PieChart as PieChartComponent,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
-  Cell,
 } from 'recharts';
+import Image from 'next/image';
+import { useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,28 +32,32 @@ import {
   ChartContainer,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirebase, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { doc, collection, query } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import type { ChildProfile } from '@/app/parent-dashboard/page';
 import { Loader2 } from 'lucide-react';
 
-const dailyWatchData = [
-  { date: 'Mon', minutes: 30 },
-  { date: 'Tue', minutes: 45 },
-  { date: 'Wed', minutes: 60 },
-  { date: 'Thu', minutes: 25 },
-  { date: 'Fri', minutes: 75 },
-  { date: 'Sat', minutes: 90 },
-  { date: 'Sun', minutes: 50 },
-];
+export type VideoWatchEvent = {
+  id: string;
+  parentId: string;
+  childProfileId: string;
+  youtubeVideoId: string;
+  channelId: string;
+  channelTitle: string;
+  contentTypeId?: string;
+  watchDurationSeconds: number;
+  watchedAt: string; // ISO string
+  videoTitle: string;
+  videoThumbnailUrl: string;
+  videoUrl: string;
+};
 
-const categoryWatchData = [
-  { name: 'Educational', value: 400, fill: '#8884d8' },
-  { name: 'Cartoons', value: 300, fill: '#82ca9d' },
-  { name: 'Music', value: 200, fill: '#ffc658' },
-  { name: 'Crafts', value: 100, fill: '#ff8042' },
-];
+const formatDuration = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return `${h > 0 ? `${h}h ` : ''}${m}m`;
+}
 
 export default function AnalyticsPage() {
   const { firestore, user } = useFirebase();
@@ -66,9 +69,73 @@ export default function AnalyticsPage() {
     return doc(firestore, 'parents', user.uid, 'childProfiles', childId);
   }, [user, firestore, childId]);
 
-  const { data: profile, isLoading } = useDoc<ChildProfile>(childProfileRef);
+  const { data: profile, isLoading: isLoadingProfile } = useDoc<ChildProfile>(childProfileRef);
 
-  if (isLoading) {
+  const watchEventsQuery = useMemoFirebase(() => {
+    if (!user || !firestore || !childId) return null;
+    return query(
+      collection(firestore, 'parents', user.uid, 'childProfiles', childId, 'videoWatchEvents')
+    );
+  }, [user, firestore, childId]);
+
+  const { data: watchEvents, isLoading: isLoadingEvents } = useCollection<VideoWatchEvent>(watchEventsQuery);
+
+  const analytics = useMemo(() => {
+    if (!watchEvents || watchEvents.length === 0) {
+        return {
+            totalWatchTime: 0,
+            videosWatched: 0,
+            favoriteChannel: 'N/A',
+            dailyWatchData: Array(7).fill(0).map((_, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() - i);
+              return { date: d.toLocaleDateString('en-US', { weekday: 'short' }), minutes: 0 };
+            }).reverse(),
+            recentVideos: [],
+        };
+    }
+
+    const totalWatchTime = watchEvents.reduce((acc, event) => acc + event.watchDurationSeconds, 0);
+    const videosWatched = watchEvents.length;
+
+    const channelWatchTimes: { [key: string]: number } = {};
+    watchEvents.forEach(event => {
+        if (event.channelTitle) {
+            channelWatchTimes[event.channelTitle] = (channelWatchTimes[event.channelTitle] || 0) + event.watchDurationSeconds;
+        }
+    });
+    const favoriteChannel = Object.keys(channelWatchTimes).length > 0 ? Object.entries(channelWatchTimes).reduce((a, b) => a[1] > b[1] ? a : b)[0] : 'N/A';
+
+    const weeklyData: { date: string, minutes: number }[] = Array(7).fill(0).map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return { date: d.toLocaleDateString('en-US', { weekday: 'short' }), minutes: 0 };
+    }).reverse();
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setHours(0,0,0,0);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+    watchEvents.forEach(event => {
+        const eventDate = new Date(event.watchedAt);
+        if (eventDate >= sevenDaysAgo) {
+            const dayStr = eventDate.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayObj = weeklyData.find(d => d.date === dayStr);
+            if (dayObj) {
+                dayObj.minutes += Math.round(event.watchDurationSeconds / 60);
+            }
+        }
+    });
+
+    const recentVideos = [...watchEvents]
+      .sort((a,b) => new Date(b.watchedAt).getTime() - new Date(a.watchedAt).getTime())
+      .slice(0, 5);
+
+    return { totalWatchTime, videosWatched, favoriteChannel, dailyWatchData: weeklyData, recentVideos };
+
+  }, [watchEvents]);
+
+  if (isLoadingProfile || isLoadingEvents) {
     return (
       <div className="light flex min-h-screen items-center justify-center bg-white">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
@@ -117,8 +184,8 @@ export default function AnalyticsPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">7h 15m</div>
-              <p className="text-xs text-muted-foreground">This week</p>
+              <div className="text-2xl font-bold">{formatDuration(analytics.totalWatchTime)}</div>
+              <p className="text-xs text-muted-foreground">All time</p>
             </CardContent>
           </Card>
           <Card>
@@ -129,8 +196,8 @@ export default function AnalyticsPage() {
               <Film className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">42</div>
-              <p className="text-xs text-muted-foreground">This week</p>
+              <div className="text-2xl font-bold">{analytics.videosWatched}</div>
+              <p className="text-xs text-muted-foreground">All time</p>
             </CardContent>
           </Card>
           <Card>
@@ -141,7 +208,7 @@ export default function AnalyticsPage() {
               <Tv className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold truncate">Blippi</div>
+              <div className="text-2xl font-bold truncate">{analytics.favoriteChannel}</div>
               <p className="text-xs text-muted-foreground">Most time spent</p>
             </CardContent>
           </Card>
@@ -157,7 +224,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent className="h-[300px] w-full">
               <ChartContainer config={{}} className="h-full w-full">
-                <BarChartComponent data={dailyWatchData}>
+                <BarChartComponent data={analytics.dailyWatchData}>
                   <CartesianGrid vertical={false} />
                   <XAxis
                     dataKey="date"
@@ -185,31 +252,28 @@ export default function AnalyticsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Top Categories</CardTitle>
+              <CardTitle className="text-lg">Recently Watched</CardTitle>
               <CardDescription>
-                Breakdown of content categories watched.
+                The last 5 videos this child watched.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex h-[300px] w-full items-center justify-center">
-              <ChartContainer config={{}} className="h-full w-full">
-                <PieChartComponent>
-                  <Tooltip content={<ChartTooltipContent />} />
-                  <Pie
-                    data={categoryWatchData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    label
-                  >
-                    {categoryWatchData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Legend />
-                </PieChartComponent>
-              </ChartContainer>
+            <CardContent className="space-y-4">
+              {analytics.recentVideos.length > 0 ? analytics.recentVideos.map((video: VideoWatchEvent) => (
+                <div key={video.id} className="flex items-center gap-3">
+                  <Image src={video.videoThumbnailUrl} alt={video.videoTitle} width={80} height={45} className="rounded-md object-cover"/>
+                  <div className='flex-1'>
+                    <p className="text-sm font-semibold truncate">{video.videoTitle}</p>
+                    <p className="text-xs text-muted-foreground">{video.channelTitle}</p>
+                  </div>
+                  <Button asChild variant="ghost" size="icon">
+                    <a href={video.videoUrl} target="_blank" rel="noopener noreferrer">
+                      <Eye className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </div>
+              )) : (
+                <p className="text-sm text-center text-muted-foreground py-8">No watch history yet.</p>
+              )}
             </CardContent>
           </Card>
         </div>

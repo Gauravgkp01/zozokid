@@ -285,6 +285,10 @@
           "type": "string",
           "description": "Unique identifier for the VideoWatchEvent entity."
         },
+        "parentId": {
+          "type": "string",
+          "description": "Denormalized reference to the owning Parent for authorization."
+        },
         "childProfileId": {
           "type": "string",
           "description": "Reference to the ChildProfile that watched the video. (Relationship: ChildProfile 1:N VideoWatchEvent)"
@@ -295,7 +299,11 @@
         },
         "channelId": {
           "type": "string",
-          "description": "Reference to the Channel entity from which the video originated. (Relationship: Channel 1:N VideoWatchEvent)"
+          "description": "The ID of the YouTube channel from which the video originated."
+        },
+        "channelTitle": {
+          "type": "string",
+          "description": "The title of the YouTube channel at the time it was watched."
         },
         "contentTypeId": {
           "type": "string",
@@ -327,10 +335,11 @@
       },
       "required": [
         "id",
+        "parentId",
         "childProfileId",
         "youtubeVideoId",
         "channelId",
-        "contentTypeId",
+        "channelTitle",
         "watchDurationSeconds",
         "watchedAt"
       ]
@@ -358,6 +367,10 @@
           "format": "uri",
           "description": "URL of the video thumbnail."
         },
+        "channelId": {
+          "type": "string",
+          "description": "The ID of the YouTube channel this video belongs to."
+        },
         "channelTitle": {
           "type": "string",
           "description": "The title of the YouTube channel this video belongs to."
@@ -366,7 +379,9 @@
       "required": [
         "parentId",
         "createdAt",
-        "title"
+        "title",
+        "channelId",
+        "channelTitle"
       ]
     }
   },

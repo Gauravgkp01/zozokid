@@ -20,6 +20,7 @@ const ShortVideoInfoSchema = z.object({
     id: z.string(),
     title: z.string(),
     thumbnailUrl: z.string(),
+    channelId: z.string(),
     channelTitle: z.string(),
   });
 export type ShortVideoInfo = z.infer<typeof ShortVideoInfoSchema>;
@@ -104,6 +105,7 @@ const getShortVideosFromChannelFlow = ai.defineFlow(
                     id: video.id,
                     title: video.snippet.title,
                     thumbnailUrl: video.snippet.thumbnails.default.url,
+                    channelId: video.snippet.channelId,
                     channelTitle: video.snippet.channelTitle
                 });
             }

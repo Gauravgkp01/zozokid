@@ -49,9 +49,9 @@ export default function ProfilesPage() {
   const { data: profiles, isLoading } =
     useCollection<ChildProfile>(childProfilesQuery);
 
-  const handleProfileClick = () => {
+  const handleProfileClick = (profile: ChildProfile) => {
     sessionStorage.setItem('playbackAllowed', 'true');
-    router.push('/feed');
+    router.push(`/feed/${profile.id}`);
   };
 
   return (
@@ -92,7 +92,7 @@ export default function ProfilesPage() {
                 <div
                   key={profile.id}
                   className="group cursor-pointer text-center"
-                  onClick={handleProfileClick}
+                  onClick={() => handleProfileClick(profile)}
                 >
                   <div className="relative">
                     <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-transparent transition-transform group-hover:scale-105">

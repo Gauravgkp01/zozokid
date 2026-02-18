@@ -72,8 +72,10 @@ service cloud.firestore {
     
     // Validates relational integrity for a VideoWatchEvent on creation.
     function hasValidWatchEventDataOnCreate(parentId, childProfileId) {
-      return request.resource.data.parentId == parentId
-          && request.resource.data.childProfileId == childProfileId;
+      let data = request.resource.data;
+      return data.parentId == parentId
+          && data.childProfileId == childProfileId
+          && data.channelTitle != null;
     }
     
     // Enforces immutability of relational links for a VideoWatchEvent on update.
@@ -93,11 +95,16 @@ service cloud.firestore {
     }
     
     function hasValidVideoDataOnCreate(parentId) {
-      return request.resource.data.parentId == parentId;
+      let data = request.resource.data;
+      return data.parentId == parentId
+          && data.channelId != null
+          && data.channelTitle != null;
     }
     
     function hasValidVideoDataOnUpdate() {
-        return request.resource.data.parentId == resource.data.parentId;
+      let data = request.resource.data;
+      return data.parentId == resource.data.parentId
+          && data.channelId == resource.data.channelId;
     }
 
     /**
@@ -189,5 +196,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

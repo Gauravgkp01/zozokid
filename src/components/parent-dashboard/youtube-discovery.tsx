@@ -60,6 +60,7 @@ export function YoutubeDiscovery() {
             createdAt: new Date().toISOString(),
             title: video.title,
             thumbnailUrl: video.thumbnailUrl,
+            channelId: video.channelId,
             channelTitle: video.channelTitle,
         };
 
@@ -105,6 +106,7 @@ export function YoutubeDiscovery() {
                     createdAt: new Date().toISOString(),
                     title: video.title,
                     thumbnailUrl: video.thumbnailUrl,
+                    channelId: video.channelId,
                     channelTitle: video.channelTitle,
                 };
                 setDocumentNonBlocking(videoRef, videoData, { merge: true });

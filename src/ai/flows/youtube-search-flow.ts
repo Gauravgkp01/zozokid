@@ -31,6 +31,7 @@ const YoutubeVideoResultSchema = z.object({
   title: z.string(),
   description: z.string(),
   thumbnailUrl: z.string(),
+  channelId: z.string(),
   channelTitle: z.string(),
 });
 export type YoutubeVideoResult = z.infer<typeof YoutubeVideoResultSchema>;
@@ -86,6 +87,7 @@ const discoverYoutubeContentFlow = ai.defineFlow(
           title: item.snippet.title,
           description: item.snippet.description,
           thumbnailUrl: item.snippet.thumbnails.default.url,
+          channelId: item.snippet.channelId,
           channelTitle: item.snippet.channelTitle,
         });
       }

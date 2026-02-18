@@ -27,8 +27,8 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 import { YoutubeDiscovery } from '@/components/parent-dashboard/youtube-discovery';
+import { getVideoDetails } from '@/ai/flows/get-video-details-flow';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -77,6 +77,7 @@ export default function ParentDashboardPage() {
     const [profileToEdit, setProfileToEdit] = useState<ChildProfile | undefined>(undefined);
     const { toast } = useToast();
     const [youtubeLink, setYoutubeLink] = useState('');
+    const [isAddingVideo, setIsAddingVideo] = useState(false);
 
 
     const childProfilesQuery = useMemoFirebase(() => {
@@ -102,7 +103,7 @@ export default function ParentDashboardPage() {
       return match ? match[1] : null;
     };
     
-    const handleAddVideo = () => {
+    const handleAddVideo = async () => {
         if (!user || !firestore) {
             toast({
               variant: 'destructive',
@@ -122,21 +123,38 @@ export default function ParentDashboardPage() {
           });
           return;
         }
+        
+        setIsAddingVideo(true);
+        try {
+            const videoDetails = await getVideoDetails(videoId);
+            const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', videoDetails.id);
+            const videoData = {
+                parentId: user.uid,
+                createdAt: new Date().toISOString(),
+                title: videoDetails.title,
+                thumbnailUrl: videoDetails.thumbnailUrl,
+                channelId: videoDetails.channelId,
+                channelTitle: videoDetails.channelTitle,
+            };
     
-        const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', videoId);
-        const videoData = {
-            parentId: user.uid,
-            createdAt: new Date().toISOString(),
-        };
-
-        setDocumentNonBlocking(videoRef, videoData, { merge: true });
-
-        toast({
-            title: 'Video Added!',
-            description: 'The video has been added to the feed.',
-        });
-
-        setYoutubeLink('');
+            setDocumentNonBlocking(videoRef, videoData, { merge: true });
+    
+            toast({
+                title: 'Video Added!',
+                description: 'The video has been added to the feed.',
+            });
+    
+            setYoutubeLink('');
+        } catch (error) {
+            console.error('Error adding video by link:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error adding video',
+                description: (error as Error).message || 'Could not fetch video details.',
+            });
+        } finally {
+            setIsAddingVideo(false);
+        }
     };
     
   return (
@@ -196,9 +214,9 @@ export default function ParentDashboardPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12h 30m</div>
+              <div className="text-2xl font-bold">--</div>
               <p className="text-xs text-muted-foreground">
-                +20.1% from last week
+                Aggregated analytics coming soon.
               </p>
             </CardContent>
           </Card>
@@ -210,9 +228,9 @@ export default function ParentDashboardPage() {
               <Video className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+5</div>
+              <div className="text-2xl font-bold">--</div>
               <p className="text-xs text-muted-foreground">
-                in the last 7 days
+                Aggregated analytics coming soon.
               </p>
             </CardContent>
           </Card>
@@ -224,9 +242,9 @@ export default function ParentDashboardPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Space</div>
+              <div className="text-2xl font-bold">--</div>
               <p className="text-xs text-muted-foreground">
-                Most watched category
+                Aggregated analytics coming soon.
               </p>
             </CardContent>
           </Card>
@@ -272,7 +290,7 @@ export default function ParentDashboardPage() {
                     className="rounded-full px-5 text-white hover:bg-[#FF4081]/90"
                     asChild
                   >
-                    <Link href="/feed">Watch</Link>
+                    <Link href={`/feed/${profile.id}`}>Watch</Link>
                   </Button>
                   <Button
                     variant="outline"
@@ -325,7 +343,9 @@ export default function ParentDashboardPage() {
                     onChange={(e) => setYoutubeLink(e.target.value)}
                     className="flex-grow"
                   />
-                  <Button onClick={handleAddVideo}>Add Video</Button>
+                  <Button onClick={handleAddVideo} disabled={isAddingVideo}>
+                    {isAddingVideo ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Add Video' }
+                  </Button>
                 </div>
               </CardContent>
             </Card>
