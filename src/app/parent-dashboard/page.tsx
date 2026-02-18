@@ -29,6 +29,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ContentPreferences } from '@/components/parent-dashboard/content-preferences';
+import { YoutubeDiscovery } from '@/components/parent-dashboard/youtube-discovery';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -306,9 +307,11 @@ export default function ParentDashboardPage() {
           </Card>
           
           <div className="space-y-6">
+            <YoutubeDiscovery />
+
             <Card className="bg-gray-50">
               <CardHeader>
-                <CardTitle className="text-lg">Add Videos to Feed</CardTitle>
+                <CardTitle className="text-lg">Add Video by Link</CardTitle>
                 <CardDescription>
                   Paste a YouTube link to add it to the feed for all children.
                 </CardDescription>
