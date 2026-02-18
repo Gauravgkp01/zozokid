@@ -36,6 +36,7 @@ import { signOut } from 'firebase/auth';
 import type { Class } from '@/app/teacher-dashboard/page';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
+import { ChildClassesList } from '@/components/parent-dashboard/child-classes-list';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -428,21 +429,25 @@ export default function ParentDashboardPage() {
                 key={profile.id} 
                 className="flex flex-col items-start gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="flex items-center gap-3">
-                   {profile.avatarUrl && (
-                        <Image
-                            src={profile.avatarUrl}
-                            alt={profile.name}
-                            width={40}
-                            height={40}
-                            className="rounded-full object-cover"
-                        />
-                    )}
-                  <div>
-                    <p className="font-bold">{profile.name}</p>
-                    <p className="text-sm text-muted-foreground">Age: {profile.age}</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    {profile.avatarUrl && (
+                          <Image
+                              src={profile.avatarUrl}
+                              alt={profile.name}
+                              width={40}
+                              height={40}
+                              className="rounded-full object-cover"
+                          />
+                      )}
+                    <div>
+                      <p className="font-bold">{profile.name}</p>
+                      <p className="text-sm text-muted-foreground">Age: {profile.age}</p>
+                    </div>
                   </div>
+                  {user && <ChildClassesList childId={profile.id} parentId={user.uid} />}
                 </div>
+
                 <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
                   <Button
                     style={{ backgroundColor: '#FF4081' }}
@@ -582,5 +587,3 @@ export default function ParentDashboardPage() {
     </div>
   );
 }
-
-    
