@@ -8,11 +8,11 @@ import { getVideoDetails } from '@/ai/flows/get-video-details-flow';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Search, Video, PlusCircle, Link as LinkIcon } from 'lucide-react';
+import { Loader2, Search, Video, PlusCircle, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { useFirebase } from '@/firebase';
 import { doc, writeBatch, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import type { Class } from '@/app/teacher-dashboard/page';
+import type { Class, AddedContent } from '@/app/teacher-dashboard/page';
 
 type YoutubeSearchOutput = {
     channels: YoutubeChannelResult[];
@@ -38,6 +38,10 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
     // State for Add by Link
     const [youtubeLink, setYoutubeLink] = useState('');
     const [isAddingByLink, setIsAddingByLink] = useState(false);
+
+    // State for Deletion
+    const [isDeleting, setIsDeleting] = useState<string | null>(null); // Use a unique identifier for the item being deleted
+    const [isClearing, setIsClearing] = useState(false);
 
     const handleBatchAddVideos = async (videosToAdd: { id: string, title: string, thumbnailUrl: string, channelId: string, channelTitle: string }[]) => {
         if (!firestore || !classData.students || classData.students.length === 0) {
@@ -223,6 +227,120 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
         }
     };
 
+    const handleDeleteContent = async (itemToDelete: AddedContent) => {
+        if (!firestore || !classData.students || classData.students.length === 0) {
+            toast({ variant: 'destructive', title: 'No Students in Class' });
+            return;
+        }
+
+        const uniqueItemId = itemToDelete.id + itemToDelete.addedAt;
+        setIsDeleting(uniqueItemId);
+
+        try {
+            let videosToDelete: { id: string }[] = [];
+            if (itemToDelete.type === 'video') {
+                videosToDelete.push({ id: itemToDelete.id });
+            } else if (itemToDelete.type === 'channel') {
+                videosToDelete = await getShortVideosFromChannel(itemToDelete.id);
+            }
+
+            if (videosToDelete.length === 0 && itemToDelete.type === 'channel') {
+                 toast({ title: 'No videos to remove.' });
+            } else {
+                const batch = writeBatch(firestore);
+    
+                // Delete videos from student queues
+                classData.students.forEach(student => {
+                    videosToDelete.forEach(video => {
+                        const videoRef = doc(firestore, 'parents', student.parentId, 'videoQueue', video.id);
+                        batch.delete(videoRef);
+                    });
+                });
+    
+                // Remove content from class document
+                const classRef = doc(firestore, 'classes', classData.id);
+                const updatedContent = (classData.content || []).filter(c => c.id !== itemToDelete.id || c.addedAt !== itemToDelete.addedAt);
+                batch.update(classRef, { content: updatedContent });
+                
+                await batch.commit();
+    
+                toast({
+                    title: 'Content Removed',
+                    description: `"${itemToDelete.title}" and associated videos have been removed.`,
+                });
+            }
+        } catch (error) {
+            console.error('Error deleting content:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error Removing Content',
+                description: (error as Error).message || 'Could not remove the content.',
+            });
+        } finally {
+            setIsDeleting(null);
+        }
+    };
+
+    const handleClearAllContent = async () => {
+        if (!firestore || !classData.students || classData.students.length === 0 || !classData.content || classData.content.length === 0) {
+            toast({ title: 'Nothing to clear' });
+            return;
+        }
+
+        setIsClearing(true);
+        try {
+            const videoIdsToDelete = new Set<string>();
+
+            const channelPromises = (classData.content || [])
+                .filter(item => item.type === 'channel')
+                .map(item => getShortVideosFromChannel(item.id));
+            
+            const videoItems = (classData.content || []).filter(item => item.type === 'video');
+            videoItems.forEach(item => videoIdsToDelete.add(item.id));
+
+            const channelVideoLists = await Promise.all(channelPromises);
+            channelVideoLists.forEach(list => list.forEach(video => videoIdsToDelete.add(video.id)));
+
+            if (videoIdsToDelete.size === 0) {
+                toast({ title: 'No videos to remove.' });
+                // Also clear the content array if it only contained empty channels
+                const classRef = doc(firestore, 'classes', classData.id);
+                await updateDoc(classRef, { content: [] });
+            } else {
+                const batch = writeBatch(firestore);
+    
+                // Delete videos from student queues
+                classData.students.forEach(student => {
+                    videoIdsToDelete.forEach(videoId => {
+                        const videoRef = doc(firestore, 'parents', student.parentId, 'videoQueue', videoId);
+                        batch.delete(videoRef);
+                    });
+                });
+    
+                // Clear content from class document
+                const classRef = doc(firestore, 'classes', classData.id);
+                batch.update(classRef, { content: [] });
+    
+                await batch.commit();
+    
+                toast({
+                    title: 'Class Feed Cleared',
+                    description: `All ${videoIdsToDelete.size} unique videos have been removed.`,
+                });
+            }
+
+        } catch (error) {
+            console.error('Error clearing class feed:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error Clearing Feed',
+                description: (error as Error).message || 'Could not clear the class feed.',
+            });
+        } finally {
+            setIsClearing(false);
+        }
+    };
+
 
     return (
         <div className="space-y-6">
@@ -342,19 +460,54 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
                         {classData.content && classData.content.length > 0 ? (
                             [...classData.content]
                                 .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
-                                .map((item, index) => (
-                                    <div key={`${item.id}-${index}`} className="flex items-center gap-3 rounded-lg border bg-background p-2">
+                                .map((item) => (
+                                    <div key={item.id + item.addedAt} className="flex items-center gap-3 rounded-lg border bg-background p-2">
                                         <Image src={item.thumbnailUrl} alt={item.title} width={48} height={48} className="rounded-md object-cover" />
                                         <div className="flex-1 overflow-hidden">
                                             <p className="font-bold text-sm truncate">{item.title}</p>
                                             <p className="text-xs text-muted-foreground capitalize">{item.type}</p>
                                         </div>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            onClick={() => handleDeleteContent(item)} 
+                                            disabled={isDeleting !== null}
+                                            className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                                        >
+                                            {isDeleting === (item.id + item.addedAt) ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4" />}
+                                        </Button>
                                     </div>
                                 ))
                         ) : (
                             <p className="text-center text-muted-foreground text-sm py-8">No content has been added to this class yet.</p>
                         )}
                     </div>
+                </CardContent>
+            </Card>
+            <Card className="border-destructive">
+                <CardHeader>
+                    <CardTitle className="text-lg text-destructive">Danger Zone</CardTitle>
+                    <CardDescription>
+                        This will permanently remove all teacher-added content from every student&apos;s feed for this class.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={handleClearAllContent}
+                        disabled={isClearing || !classData.content || classData.content.length === 0}
+                    >
+                        {isClearing ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Trash2 className="mr-2 h-4 w-4" />
+                        )}
+                        Clear All Added Content
+                    </Button>
+                    {(!classData.content || classData.content.length === 0) && (
+                        <p className="text-xs text-muted-foreground text-center mt-2">The class feed is already empty.</p>
+                    )}
                 </CardContent>
             </Card>
         </div>
