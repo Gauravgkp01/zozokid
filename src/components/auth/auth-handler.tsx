@@ -26,11 +26,7 @@ export function AuthHandler() {
     
     // Redirect away from private routes if not logged in
     if (!user && isPrivateRoute) {
-      if (TEACHER_PRIVATE_ROUTES.some(route => pathname.startsWith(route))) {
-        router.push('/teacher/login');
-      } else {
-        router.push('/login');
-      }
+      router.push('/login');
       return;
     }
 
