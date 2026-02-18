@@ -30,6 +30,8 @@ type VideoReelItemProps = {
   childId: string;
   parentId: string;
   isPlaybackAllowed: boolean;
+  index: number;
+  onVisible: (index: number) => void;
 };
 
 // A global promise to ensure the YouTube IFrame API script is loaded and ready.
@@ -60,6 +62,8 @@ export function VideoReelItem({
   childId,
   parentId,
   isPlaybackAllowed,
+  index,
+  onVisible,
 }: VideoReelItemProps) {
   const { firestore } = useFirebase();
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -153,6 +157,7 @@ export function VideoReelItem({
       if (!player || typeof player.playVideo !== 'function') return;
 
       if (entry.isIntersecting) {
+        onVisible(index);
         if (isPlaybackAllowed) {
             player.unMute();
         }
@@ -176,7 +181,7 @@ export function VideoReelItem({
             observerRef.current = null;
         }
     };
-  }, [isPlaybackAllowed]);
+  }, [isPlaybackAllowed, index, onVisible]);
 
 
   return (
