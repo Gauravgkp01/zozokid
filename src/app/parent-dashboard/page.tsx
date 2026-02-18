@@ -213,28 +213,26 @@ export default function ParentDashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full border-gray-300 text-foreground"
-            asChild
-          >
-            <Link href="/profiles">
-              <Users className="h-5 w-5" />
-              <span className="sr-only">Profiles</span>
-            </Link>
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full border-gray-300 text-foreground"
-            asChild
-          >
-            <Link href="/login">
-              <LogOut className="h-5 w-5" />
-              <span className="sr-only">Logout</span>
-            </Link>
-          </Button>
+            <Button
+                variant="outline"
+                asChild
+                className="rounded-full border-gray-300 text-foreground"
+            >
+                <Link href="/profiles" className="px-3 sm:px-4">
+                <Users className="h-5 w-5 sm:mr-2" />
+                <span className="hidden sm:inline">Profiles</span>
+                </Link>
+            </Button>
+            <Button
+                variant="outline"
+                asChild
+                className="rounded-full border-gray-300 text-foreground"
+            >
+                <Link href="/login" className="px-3 sm:px-4">
+                <LogOut className="h-5 w-5 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
+                </Link>
+            </Button>
         </div>
       </header>
 
@@ -310,7 +308,7 @@ export default function ParentDashboardPage() {
             {!isLoading && profiles && profiles.map((profile) => (
               <div 
                 key={profile.id} 
-                className="flex items-center justify-between rounded-lg border p-3"
+                className="flex flex-col items-start gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-3">
                    {profile.avatarUrl && (
@@ -327,10 +325,10 @@ export default function ParentDashboardPage() {
                     <p className="text-sm text-muted-foreground">Age: {profile.age}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
                   <Button
                     style={{ backgroundColor: '#FF4081' }}
-                    className="rounded-full px-5 text-white hover:bg-[#FF4081]/90"
+                    className="flex-1 rounded-full px-5 text-white hover:bg-[#FF4081]/90 sm:flex-none"
                     asChild
                   >
                     <Link href={`/feed/${profile.id}`}>Watch</Link>
