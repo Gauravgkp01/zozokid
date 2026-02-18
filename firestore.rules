@@ -177,9 +177,10 @@ service cloud.firestore {
      * @description Manages requests for a child to join a class.
      */
     match /classJoinRequests/{requestId} {
-      allow read: if isSignedIn() && (resource.data.parentId == request.auth.uid || resource.data.teacherId == request.auth.uid);
+      allow get: if isSignedIn() && (resource.data.parentId == request.auth.uid || resource.data.teacherId == request.auth.uid);
+      allow list: if isSignedIn() && (request.query.where.teacherId == request.auth.uid || request.query.where.parentId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.parentId == request.auth.uid;
-      allow update: if isSignedIn() && request.resource.data.teacherId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.teacherId == request.auth.uid;
       allow delete: if isSignedIn() && (resource.data.parentId == request.auth.uid || resource.data.teacherId == request.auth.uid);
     }
 

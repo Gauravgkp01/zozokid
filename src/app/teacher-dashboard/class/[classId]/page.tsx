@@ -129,13 +129,14 @@ export default function ClassDetailsPage() {
   const { data: classData, isLoading: isLoadingClass } = useDoc<Class>(classRef);
 
   const joinRequestsQuery = useMemoFirebase(() => {
-    if (!firestore || !classId) return null;
+    if (!user || !firestore || !classId) return null;
     return query(
       collection(firestore, 'classJoinRequests'),
+      where('teacherId', '==', user.uid),
       where('classId', '==', classId),
       where('status', '==', 'pending')
     );
-  }, [firestore, classId]);
+  }, [user, firestore, classId]);
 
   const { data: joinRequests, isLoading: isLoadingRequests } = useCollection<ClassJoinRequest>(joinRequestsQuery);
 
