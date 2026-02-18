@@ -68,6 +68,7 @@ function StudentList({ students, classData }: { students: { studentId: string; p
 
   useEffect(() => {
     if (!firestore || students.length === 0) {
+        setStudentProfiles([]);
         setIsLoading(false);
         return;
     }
@@ -110,6 +111,9 @@ function StudentList({ students, classData }: { students: { studentId: string; p
         });
 
         await batch.commit();
+        
+        // Manually update the state to immediately reflect the change
+        setStudentProfiles(prevProfiles => prevProfiles.filter(p => p.id !== profile.id));
 
         toast({
             title: "Student Removed",
