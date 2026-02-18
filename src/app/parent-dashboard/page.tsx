@@ -245,6 +245,7 @@ export default function ParentDashboardPage() {
           childAvatarUrl: selectedProfile.avatarUrl || '',
           status: 'pending',
           createdAt: new Date().toISOString(),
+          viewers: [user.uid, classData.teacherId],
         };
         await addDocumentNonBlocking(joinRequestsRef, requestData);
   

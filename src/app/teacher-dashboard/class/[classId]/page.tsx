@@ -55,6 +55,7 @@ type ClassJoinRequest = {
   childAvatarUrl: string;
   status: 'pending' | 'approved' | 'denied';
   createdAt: string;
+  viewers: string[];
 };
 
 function StudentList({ students }: { students: { studentId: string; parentId: string }[] }) {
@@ -132,8 +133,8 @@ export default function ClassDetailsPage() {
     if (!user || !firestore || !classId) return null;
     return query(
       collection(firestore, 'classJoinRequests'),
-      where('teacherId', '==', user.uid),
       where('classId', '==', classId),
+      where('viewers', 'array-contains', user.uid),
       where('status', '==', 'pending')
     );
   }, [user, firestore, classId]);

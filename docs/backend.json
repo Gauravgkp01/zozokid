@@ -171,6 +171,13 @@
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "viewers": {
+          "type": "array",
+          "description": "An array containing the parentId and teacherId, for security rule query purposes.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -181,7 +188,8 @@
         "childProfileId",
         "childName",
         "status",
-        "createdAt"
+        "createdAt",
+        "viewers"
       ]
     },
     "ChildProfile": {

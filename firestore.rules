@@ -175,14 +175,14 @@ service cloud.firestore {
 
     /**
      * @description Manages requests for a child to join a class.
-     * The `list` operation is implicitly secured by the `get` rule. The client MUST
-     * include a `where` clause on either `teacherId` or `parentId` to match the `request.auth.uid`.
+     * `read` operations are secured via the `viewers` array. The client MUST query
+     * using `where('viewers', 'array-contains', request.auth.uid)`.
      */
     match /classJoinRequests/{requestId} {
-      allow get: if isSignedIn() && (resource.data.parentId == request.auth.uid || resource.data.teacherId == request.auth.uid);
-      allow create: if isSignedIn() && request.resource.data.parentId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.teacherId == request.auth.uid;
-      allow delete: if isSignedIn() && (resource.data.parentId == request.auth.uid || resource.data.teacherId == request.auth.uid);
+      allow read: if isSignedIn() && request.auth.uid in resource.data.viewers;
+      allow create: if isSignedIn() && request.resource.data.parentId == request.auth.uid && request.auth.uid in request.resource.data.viewers;
+      allow update: if isSignedIn() && resource.data.teacherId == request.auth.uid && request.auth.uid in resource.data.viewers;
+      allow delete: if isSignedIn() && request.auth.uid in resource.data.viewers;
     }
 
     /**
