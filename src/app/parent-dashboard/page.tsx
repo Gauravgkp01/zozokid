@@ -25,9 +25,9 @@ import {
 } from '@/components/ui/card';
 import { ProfileFormDialog } from '@/components/parent-dashboard/profile-form-dialog';
 import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
-import { collection, doc, writeBatch, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, writeBatch, getDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { YoutubeDiscovery } from '@/components/parent-dashboard/youtube-discovery';
@@ -78,6 +78,18 @@ export type ChildProfile = {
     sharedWithTeacherIds: string[];
 };
 
+export type VideoInQueue = {
+  id: string;
+  parentId: string;
+  addedById: string;
+  addedByType: 'parent' | 'teacher';
+  createdAt: string;
+  title: string;
+  thumbnailUrl: string;
+  channelId: string;
+  channelTitle: string;
+}
+
 export default function ParentDashboardPage() {
     const { user, firestore, auth } = useFirebase();
     const router = useRouter();
@@ -104,7 +116,12 @@ export default function ParentDashboardPage() {
         return collection(firestore, 'parents', user.uid, 'videoQueue');
     }, [user, firestore]);
     
-    const { data: videosInQueue, isLoading: isLoadingQueue } = useCollection(videoQueueQuery);
+    const { data: videosInQueue, isLoading: isLoadingQueue } = useCollection<VideoInQueue>(videoQueueQuery);
+
+    const parentAddedVideoCount = useMemo(() => {
+      if (!videosInQueue) return 0;
+      return videosInQueue.filter(v => v.addedByType === 'parent').length;
+    }, [videosInQueue]);
 
     const handleAddProfile = () => {
       setProfileToEdit(undefined);
@@ -149,6 +166,8 @@ export default function ParentDashboardPage() {
             const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', videoDetails.id);
             const videoData = {
                 parentId: user.uid,
+                addedById: user.uid,
+                addedByType: 'parent' as const,
                 createdAt: new Date().toISOString(),
                 title: videoDetails.title,
                 thumbnailUrl: videoDetails.thumbnailUrl,
@@ -178,32 +197,37 @@ export default function ParentDashboardPage() {
     
     const handleClearFeed = async () => {
         if (!user || !firestore) return;
-        if (!videosInQueue || videosInQueue.length === 0) {
-            toast({
-                title: 'Feed is already empty',
-            });
-            return;
-        }
 
         setIsClearingFeed(true);
         try {
+            const q = query(collection(firestore, 'parents', user.uid, 'videoQueue'), where('addedByType', '==', 'parent'));
+            const parentVideosSnapshot = await getDocs(q);
+
+            if (parentVideosSnapshot.empty) {
+                toast({
+                    title: 'Your feed is already empty',
+                    description: 'No videos added by you were found.'
+                });
+                setIsClearingFeed(false);
+                return;
+            }
+
             const batch = writeBatch(firestore);
-            videosInQueue.forEach(video => {
-                const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', video.id);
-                batch.delete(videoRef);
+            parentVideosSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
             });
             await batch.commit();
 
             toast({
-                title: 'Feed Cleared',
-                description: `Successfully removed ${videosInQueue.length} video(s) from the feed.`,
+                title: 'Your Added Videos Cleared',
+                description: `Successfully removed ${parentVideosSnapshot.size} video(s) you added from the feed.`,
             });
         } catch (error) {
-            console.error('Error clearing feed:', error);
+            console.error('Error clearing parent feed:', error);
             toast({
                 variant: 'destructive',
                 title: 'Error Clearing Feed',
-                description: (error as Error).message || 'Could not remove videos from the feed.',
+                description: (error as Error).message || 'Could not remove your videos from the feed.',
             });
         } finally {
             setIsClearingFeed(false);
@@ -529,7 +553,7 @@ export default function ParentDashboardPage() {
               <CardHeader>
                 <CardTitle className="text-lg text-destructive">Danger Zone</CardTitle>
                 <CardDescription>
-                  This action is permanent and cannot be undone.
+                  This action will permanently remove all videos you have added to the feed. Teacher-added content will not be affected.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -537,17 +561,17 @@ export default function ParentDashboardPage() {
                   variant="destructive"
                   className="w-full"
                   onClick={handleClearFeed}
-                  disabled={isClearingFeed || isLoadingQueue || !videosInQueue || videosInQueue.length === 0}
+                  disabled={isClearingFeed || isLoadingQueue || parentAddedVideoCount === 0}
                 >
                   {isClearingFeed ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <Trash2 className="mr-2 h-4 w-4" />
                   )}
-                  Clear Entire Feed
+                  Clear My Added Videos
                 </Button>
-                {!isLoadingQueue && (!videosInQueue || videosInQueue.length === 0) && (
-                    <p className="text-xs text-muted-foreground text-center mt-2">The feed is already empty.</p>
+                {!isLoadingQueue && parentAddedVideoCount === 0 && (
+                    <p className="text-xs text-muted-foreground text-center mt-2">You have not added any videos to the feed.</p>
                 )}
               </CardContent>
             </Card>
@@ -558,3 +582,5 @@ export default function ParentDashboardPage() {
     </div>
   );
 }
+
+    

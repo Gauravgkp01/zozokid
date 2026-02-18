@@ -57,6 +57,8 @@ export function YoutubeDiscovery() {
         const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', video.id);
         const videoData = {
             parentId: user.uid,
+            addedById: user.uid,
+            addedByType: 'parent' as const,
             createdAt: new Date().toISOString(),
             title: video.title,
             thumbnailUrl: video.thumbnailUrl,
@@ -103,6 +105,8 @@ export function YoutubeDiscovery() {
                 const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', video.id);
                 const videoData = {
                     parentId: user.uid,
+                    addedById: user.uid,
+                    addedByType: 'parent' as const,
                     createdAt: new Date().toISOString(),
                     title: video.title,
                     thumbnailUrl: video.thumbnailUrl,
@@ -213,3 +217,5 @@ export function YoutubeDiscovery() {
         </Card>
     );
 }
+
+    

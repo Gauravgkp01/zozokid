@@ -19,6 +19,8 @@ import { useFirebase } from '@/firebase';
 export type Video = {
   id: string; // This will be the document id, which is the youtube video id
   parentId: string;
+  addedById: string;
+  addedByType: 'parent' | 'teacher';
   createdAt: string;
   title: string;
   thumbnailUrl: string;
@@ -137,3 +139,5 @@ export default function FeedPage() {
     </div>
   );
 }
+
+    

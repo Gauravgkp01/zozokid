@@ -24,7 +24,7 @@ type ClassContentManagerProps = {
 };
 
 export function ClassContentManager({ classData }: ClassContentManagerProps) {
-    const { firestore } = useFirebase();
+    const { user, firestore } = useFirebase();
     const { toast } = useToast();
 
     // State for YouTube Discovery
@@ -43,7 +43,7 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
     const [isDeleting, setIsDeleting] = useState<string | null>(null); // Use a unique identifier for the item being deleted
     const [isClearing, setIsClearing] = useState(false);
 
-    const handleBatchAddVideos = async (videosToAdd: { id: string, title: string, thumbnailUrl: string, channelId: string, channelTitle: string }[]) => {
+    const handleBatchAddVideos = async (videosToAdd: { id: string, title: string, thumbnailUrl: string, channelId: string, channelTitle: string }[], teacherId: string) => {
         if (!firestore || !classData.students || classData.students.length === 0) {
             toast({
                 variant: 'destructive',
@@ -63,6 +63,8 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
                     thumbnailUrl: video.thumbnailUrl,
                     channelId: video.channelId,
                     channelTitle: video.channelTitle,
+                    addedById: teacherId,
+                    addedByType: 'teacher' as const,
                 };
 
                 classData.students.forEach(student => {
@@ -104,8 +106,9 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
     };
 
     const handleAddVideo = async (video: YoutubeVideoResult) => {
+        if (!user) return;
         setAddingVideoId(video.id);
-        const success = await handleBatchAddVideos([video]);
+        const success = await handleBatchAddVideos([video], user.uid);
         if (success && firestore) {
             const classRef = doc(firestore, 'classes', classData.id);
             await updateDoc(classRef, {
@@ -126,6 +129,7 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
     };
 
     const handleAddChannel = async (channel: YoutubeChannelResult) => {
+        if (!user) return;
         setAddingChannelId(channel.id);
         toast({
             title: `Adding videos from ${channel.title}...`,
@@ -144,7 +148,7 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
                 return;
             }
             
-            const success = await handleBatchAddVideos(videos);
+            const success = await handleBatchAddVideos(videos, user.uid);
 
             if (success && firestore) {
                  const classRef = doc(firestore, 'classes', classData.id);
@@ -182,6 +186,7 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
     };
       
     const handleAddVideoByLink = async () => {
+        if (!user) return;
         const videoId = extractVideoID(youtubeLink);
     
         if (!videoId) {
@@ -196,7 +201,7 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
         setIsAddingByLink(true);
         try {
             const videoDetails = await getVideoDetails(videoId);
-            const success = await handleBatchAddVideos([videoDetails]);
+            const success = await handleBatchAddVideos([videoDetails], user.uid);
 
             if (success && firestore) {
                 const classRef = doc(firestore, 'classes', classData.id);
@@ -513,3 +518,5 @@ export function ClassContentManager({ classData }: ClassContentManagerProps) {
         </div>
     );
 }
+
+    
