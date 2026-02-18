@@ -11,6 +11,7 @@ import {
   Plus,
   Loader2,
   Pencil,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +23,7 @@ import {
 } from '@/components/ui/card';
 import { ProfileFormDialog } from '@/components/parent-dashboard/profile-form-dialog';
 import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, writeBatch } from 'firebase/firestore';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
@@ -78,6 +79,7 @@ export default function ParentDashboardPage() {
     const { toast } = useToast();
     const [youtubeLink, setYoutubeLink] = useState('');
     const [isAddingVideo, setIsAddingVideo] = useState(false);
+    const [isClearingFeed, setIsClearingFeed] = useState(false);
 
 
     const childProfilesQuery = useMemoFirebase(() => {
@@ -86,6 +88,13 @@ export default function ParentDashboardPage() {
       }, [user, firestore]);
     
     const { data: profiles, isLoading } = useCollection<ChildProfile>(childProfilesQuery);
+
+    const videoQueueQuery = useMemoFirebase(() => {
+        if (!user || !firestore) return null;
+        return collection(firestore, 'parents', user.uid, 'videoQueue');
+    }, [user, firestore]);
+    
+    const { data: videosInQueue, isLoading: isLoadingQueue } = useCollection(videoQueueQuery);
 
     const handleAddProfile = () => {
       setProfileToEdit(undefined);
@@ -154,6 +163,40 @@ export default function ParentDashboardPage() {
             });
         } finally {
             setIsAddingVideo(false);
+        }
+    };
+    
+    const handleClearFeed = async () => {
+        if (!user || !firestore) return;
+        if (!videosInQueue || videosInQueue.length === 0) {
+            toast({
+                title: 'Feed is already empty',
+            });
+            return;
+        }
+
+        setIsClearingFeed(true);
+        try {
+            const batch = writeBatch(firestore);
+            videosInQueue.forEach(video => {
+                const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', video.id);
+                batch.delete(videoRef);
+            });
+            await batch.commit();
+
+            toast({
+                title: 'Feed Cleared',
+                description: `Successfully removed ${videosInQueue.length} video(s) from the feed.`,
+            });
+        } catch (error) {
+            console.error('Error clearing feed:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error Clearing Feed',
+                description: (error as Error).message || 'Could not remove videos from the feed.',
+            });
+        } finally {
+            setIsClearingFeed(false);
         }
     };
     
@@ -228,9 +271,9 @@ export default function ParentDashboardPage() {
               <Video className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">--</div>
+              <div className="text-2xl font-bold">{isLoadingQueue ? <Loader2 className="h-6 w-6 animate-spin" /> : (videosInQueue?.length ?? 0)}</div>
               <p className="text-xs text-muted-foreground">
-                Aggregated analytics coming soon.
+                Total videos approved for watching.
               </p>
             </CardContent>
           </Card>
@@ -347,6 +390,33 @@ export default function ParentDashboardPage() {
                     {isAddingVideo ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Add Video' }
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gray-50 border-destructive">
+              <CardHeader>
+                <CardTitle className="text-lg text-destructive">Danger Zone</CardTitle>
+                <CardDescription>
+                  This action is permanent and cannot be undone.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={handleClearFeed}
+                  disabled={isClearingFeed || isLoadingQueue || !videosInQueue || videosInQueue.length === 0}
+                >
+                  {isClearingFeed ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="mr-2 h-4 w-4" />
+                  )}
+                  Clear Entire Feed
+                </Button>
+                {!isLoadingQueue && (!videosInQueue || videosInQueue.length === 0) && (
+                    <p className="text-xs text-muted-foreground text-center mt-2">The feed is already empty.</p>
+                )}
               </CardContent>
             </Card>
           </div>
