@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { discoverYoutubeContent, type YoutubeChannelResult, type YoutubeVideoResult } from '@/ai/flows/youtube-search-flow';
+import { getShortVideosFromChannel } from '@/ai/flows/get-short-videos-from-channel-flow';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Search, Video } from 'lucide-react';
+import { Loader2, Search, Video, PlusCircle } from 'lucide-react';
 import { useFirebase, setDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +23,8 @@ export function YoutubeDiscovery() {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<YoutubeSearchOutput | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [addingChannelId, setAddingChannelId] = useState<string | null>(null);
+
 
     const handleSearch = async () => {
         if (!query.trim()) return;
@@ -65,6 +68,60 @@ export function YoutubeDiscovery() {
         });
     };
 
+    const handleAddChannel = async (channel: YoutubeChannelResult) => {
+        if (!user || !firestore) {
+            toast({
+                variant: 'destructive',
+                title: 'Not logged in',
+                description: 'You must be logged in to add a channel.',
+            });
+            return;
+        }
+        setAddingChannelId(channel.id);
+        toast({
+            title: `Adding videos from ${channel.title}...`,
+            description: 'This might take a moment. We are filtering for short videos.',
+        });
+    
+        try {
+            const videoIds = await getShortVideosFromChannel(channel.id);
+    
+            if (videoIds.length === 0) {
+                toast({
+                    title: 'No short videos found',
+                    description: `We couldn't find any videos under 2 minutes in ${channel.title}.`,
+                });
+                return;
+            }
+    
+            let addedCount = 0;
+            for (const videoId of videoIds) {
+                const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', videoId);
+                const videoData = {
+                    parentId: user.uid,
+                    createdAt: new Date().toISOString(),
+                };
+                setDocumentNonBlocking(videoRef, videoData, { merge: true });
+                addedCount++;
+            }
+    
+            toast({
+                title: 'Channel Content Added!',
+                description: `${addedCount} videos from ${channel.title} were added to the feed.`,
+            });
+    
+        } catch (error) {
+            console.error('Error adding channel videos:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Failed to add channel',
+                description: (error as Error).message || 'Could not add videos from the channel.',
+            });
+        } finally {
+            setAddingChannelId(null);
+        }
+    };
+
     return (
         <Card className="bg-gray-50">
             <CardHeader>
@@ -103,7 +160,17 @@ export function YoutubeDiscovery() {
                                     {results.channels.map(channel => (
                                         <div key={channel.id} className="flex items-center gap-3 rounded-lg border p-2">
                                             <Image src={channel.thumbnailUrl} alt={channel.title} width={40} height={40} className="rounded-full" />
-                                            <p className="font-bold truncate">{channel.title}</p>
+                                            <div className="flex-1">
+                                                <p className="font-bold truncate">{channel.title}</p>
+                                            </div>
+                                            <Button size="sm" onClick={() => handleAddChannel(channel)} disabled={addingChannelId === channel.id}>
+                                                {addingChannelId === channel.id ? (
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                                )}
+                                                Add Channel
+                                            </Button>
                                         </div>
                                     ))}
                                 </div>
