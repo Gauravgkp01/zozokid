@@ -164,10 +164,10 @@ service cloud.firestore {
     
     /**
      * @description Global collection for classes. Only the creating teacher can manage their class.
+     * List operations are secured by the `get` rule. The client MUST filter by `teacherId`.
      */
     match /classes/{classId} {
       allow get: if isSignedIn() && resource.data.teacherId == request.auth.uid;
-      allow list: if isSignedIn(); // Client must filter by teacherId
       allow create: if isSignedIn() && hasValidClassDataOnCreate();
       allow update: if isSignedIn() && resource.data.teacherId == request.auth.uid && hasValidClassDataOnUpdate();
       allow delete: if isSignedIn() && resource.data.teacherId == request.auth.uid;
@@ -175,10 +175,11 @@ service cloud.firestore {
 
     /**
      * @description Manages requests for a child to join a class.
+     * The `list` operation is implicitly secured by the `get` rule. The client MUST
+     * include a `where` clause on either `teacherId` or `parentId` to match the `request.auth.uid`.
      */
     match /classJoinRequests/{requestId} {
       allow get: if isSignedIn() && (resource.data.parentId == request.auth.uid || resource.data.teacherId == request.auth.uid);
-      allow list: if isSignedIn() && (request.query.where.teacherId == request.auth.uid || request.query.where.parentId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.parentId == request.auth.uid;
       allow update: if isSignedIn() && resource.data.teacherId == request.auth.uid;
       allow delete: if isSignedIn() && (resource.data.parentId == request.auth.uid || resource.data.teacherId == request.auth.uid);
