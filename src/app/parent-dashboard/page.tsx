@@ -13,6 +13,7 @@ import {
   Pencil,
   Trash2,
   Send,
+  Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -300,6 +301,14 @@ export default function ParentDashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+            <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full border-gray-300 text-foreground"
+            >
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">Notifications</span>
+            </Button>
             <Button
                 variant="outline"
                 asChild
