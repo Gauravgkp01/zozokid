@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 const PARENT_AUTH_ROUTES = ['/login', '/signup'];
-const TEACHER_AUTH_ROUTES = ['/teacher/login', '/teacher/signup'];
+const TEACHER_AUTH_ROUTES = ['/teacher/login'];
 const AUTH_ROUTES = [...PARENT_AUTH_ROUTES, ...TEACHER_AUTH_ROUTES];
 
 const PARENT_PRIVATE_ROUTES = ['/feed', '/profiles', '/parent-dashboard'];

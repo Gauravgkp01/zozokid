@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,55 +11,35 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/firebase';
-import { initiateEmailSignIn } from '@/firebase/non-blocking-login';
 import React, { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export function TeacherLoginForm() {
-  const auth = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [accessCode, setAccessCode] = useState('');
+  const { toast } = useToast();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add logic to validate access code before signing in
-    initiateEmailSignIn(auth, email, password);
+    // TODO: The logic to validate the access code and open the teacher
+    // dashboard needs to be implemented.
+    toast({
+      title: 'Feature not implemented',
+      description: 'The teacher access code validation is not yet available.',
+    });
   };
 
   return (
     <Card className="w-full max-w-sm border-2 shadow-lg">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Teacher Login</CardTitle>
+        <CardTitle className="font-headline text-2xl">Teacher Access</CardTitle>
         <CardDescription>
-          Enter your credentials to access the teacher dashboard.
+          Enter the 6-digit access code provided to you.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleLogin}>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="teacher@example.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="access-code">6-Digit Access Code</Label>
+            <Label htmlFor="access-code">Access Code</Label>
             <Input
               id="access-code"
               type="text"
@@ -67,20 +47,17 @@ export function TeacherLoginForm() {
               required
               maxLength={6}
               value={accessCode}
-              onChange={(e) => setAccessCode(e.target.value)}
+              onChange={(e) => {
+                const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                setAccessCode(numericValue);
+              }}
             />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-stretch gap-4">
           <Button type="submit" className="w-full">
-            Sign in
+            Enter Dashboard
           </Button>
-          <div className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/teacher/signup" className="font-semibold underline">
-              Sign up
-            </Link>
-          </div>
         </CardFooter>
       </form>
     </Card>
