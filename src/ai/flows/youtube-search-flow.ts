@@ -15,10 +15,10 @@ import { z } from 'zod';
 const YOUTUBE_API_BASE_URL = 'https://www.googleapis.com/youtube/v3';
 
 // Schemas
-export const YoutubeSearchInputSchema = z.string().describe('A search query for YouTube content.');
+const YoutubeSearchInputSchema = z.string().describe('A search query for YouTube content.');
 export type YoutubeSearchInput = z.infer<typeof YoutubeSearchInputSchema>;
 
-export const YoutubeChannelResultSchema = z.object({
+const YoutubeChannelResultSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),
@@ -26,7 +26,7 @@ export const YoutubeChannelResultSchema = z.object({
 });
 export type YoutubeChannelResult = z.infer<typeof YoutubeChannelResultSchema>;
 
-export const YoutubeVideoResultSchema = z.object({
+const YoutubeVideoResultSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),
@@ -35,7 +35,7 @@ export const YoutubeVideoResultSchema = z.object({
 });
 export type YoutubeVideoResult = z.infer<typeof YoutubeVideoResultSchema>;
 
-export const YoutubeSearchOutputSchema = z.object({
+const YoutubeSearchOutputSchema = z.object({
   channels: z.array(YoutubeChannelResultSchema),
   videos: z.array(YoutubeVideoResultSchema),
 });
