@@ -93,7 +93,7 @@ export function NotificationBell({ userType }: NotificationBellProps) {
           <span className="sr-only">Notifications</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent align="end" className="w-80 light">
         <DropdownMenuLabel className="flex items-center justify-between">
           <span>Notifications</span>
           {unreadCount > 0 && (
@@ -115,7 +115,7 @@ export function NotificationBell({ userType }: NotificationBellProps) {
         {!isLoading && notifications && notifications.length > 0 && (
             <div className="max-h-80 overflow-y-auto">
             {notifications.map(notification => (
-                <DropdownMenuItem key={notification.id} onSelect={() => handleNotificationClick(notification)} className={`flex cursor-pointer flex-col items-start gap-1 whitespace-normal ${!notification.isRead ? 'bg-blue-50' : ''}`}>
+                <DropdownMenuItem key={notification.id} onSelect={() => handleNotificationClick(notification)} className={`flex cursor-pointer flex-col items-start gap-1 whitespace-normal ${!notification.isRead ? 'bg-accent' : ''}`}>
                     <p className="text-sm">{notification.message}</p>
                     <p className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
@@ -128,5 +128,3 @@ export function NotificationBell({ userType }: NotificationBellProps) {
     </DropdownMenu>
   );
 }
-
-    
