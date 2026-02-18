@@ -12,14 +12,13 @@ import {
   Loader2,
   Check,
   X,
-  UserCheck,
+  Video as VideoIcon,
 } from 'lucide-react';
 import {
   useFirebase,
   useDoc,
   useCollection,
   useMemoFirebase,
-  setDocumentNonBlocking,
 } from '@/firebase';
 import {
   collection,
@@ -29,7 +28,6 @@ import {
   getDoc,
   writeBatch,
   arrayUnion,
-  updateDoc,
 } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,6 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import type { Class } from '@/app/teacher-dashboard/page';
 import type { ChildProfile } from '@/app/parent-dashboard/page';
+import { ClassContentManager } from '@/components/teacher-dashboard/class-content-manager';
 
 type ClassJoinRequest = {
   id: string;
@@ -234,12 +233,15 @@ export default function ClassDetailsPage() {
       </Card>
 
       <Tabs defaultValue="students">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="students">
             <Users className="mr-2 h-4 w-4" /> Students ({classData.students?.length || 0})
           </TabsTrigger>
           <TabsTrigger value="requests">
             <UserPlus className="mr-2 h-4 w-4" /> Requests ({joinRequests?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="content">
+            <VideoIcon className="mr-2 h-4 w-4" /> Add Content
           </TabsTrigger>
         </TabsList>
         <TabsContent value="students">
@@ -285,6 +287,9 @@ export default function ClassDetailsPage() {
                     )}
                 </CardContent>
             </Card>
+        </TabsContent>
+        <TabsContent value="content">
+            <ClassContentManager classData={classData} />
         </TabsContent>
       </Tabs>
     </div>
