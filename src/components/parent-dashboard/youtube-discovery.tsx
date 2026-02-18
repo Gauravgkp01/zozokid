@@ -44,7 +44,7 @@ export function YoutubeDiscovery() {
         setIsLoading(false);
     };
 
-    const handleAddVideo = (videoId: string) => {
+    const handleAddVideo = (video: YoutubeVideoResult) => {
         if (!user || !firestore) {
             toast({
                 variant: 'destructive',
@@ -54,17 +54,20 @@ export function YoutubeDiscovery() {
             return;
         }
 
-        const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', videoId);
+        const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', video.id);
         const videoData = {
             parentId: user.uid,
             createdAt: new Date().toISOString(),
+            title: video.title,
+            thumbnailUrl: video.thumbnailUrl,
+            channelTitle: video.channelTitle,
         };
 
         setDocumentNonBlocking(videoRef, videoData, { merge: true });
 
         toast({
             title: 'Video Added!',
-            description: 'The video has been added to the feed.',
+            description: `"${video.title}" has been added to the feed.`,
         });
     };
 
@@ -84,9 +87,9 @@ export function YoutubeDiscovery() {
         });
     
         try {
-            const videoIds = await getShortVideosFromChannel(channel.id);
+            const videos = await getShortVideosFromChannel(channel.id);
     
-            if (videoIds.length === 0) {
+            if (videos.length === 0) {
                 toast({
                     title: 'No short videos found',
                     description: `We couldn't find any videos under 2 minutes in ${channel.title}.`,
@@ -95,11 +98,14 @@ export function YoutubeDiscovery() {
             }
     
             let addedCount = 0;
-            for (const videoId of videoIds) {
-                const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', videoId);
+            for (const video of videos) {
+                const videoRef = doc(firestore, 'parents', user.uid, 'videoQueue', video.id);
                 const videoData = {
                     parentId: user.uid,
                     createdAt: new Date().toISOString(),
+                    title: video.title,
+                    thumbnailUrl: video.thumbnailUrl,
+                    channelTitle: video.channelTitle,
                 };
                 setDocumentNonBlocking(videoRef, videoData, { merge: true });
                 addedCount++;
@@ -188,7 +194,7 @@ export function YoutubeDiscovery() {
                                                 <p className="font-bold text-sm truncate">{video.title}</p>
                                                 <p className="text-xs text-muted-foreground">{video.channelTitle}</p>
                                              </div>
-                                            <Button size="sm" onClick={() => handleAddVideo(video.id)}>
+                                            <Button size="sm" onClick={() => handleAddVideo(video)}>
                                                 <Video className="mr-2 h-4 w-4" /> Add
                                             </Button>
                                         </div>

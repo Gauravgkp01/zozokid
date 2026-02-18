@@ -348,11 +348,25 @@
           "type": "string",
           "format": "date-time",
           "description": "Timestamp indicating when the video was added."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the YouTube video."
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the video thumbnail."
+        },
+        "channelTitle": {
+          "type": "string",
+          "description": "The title of the YouTube channel this video belongs to."
         }
       },
       "required": [
         "parentId",
-        "createdAt"
+        "createdAt",
+        "title"
       ]
     }
   },

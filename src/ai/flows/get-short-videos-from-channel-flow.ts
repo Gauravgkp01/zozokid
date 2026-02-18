@@ -16,8 +16,17 @@ const YOUTUBE_API_BASE_URL = 'https://www.googleapis.com/youtube/v3';
 const GetShortVideosFromChannelInputSchema = z.string().describe('A YouTube channel ID.');
 export type GetShortVideosFromChannelInput = z.infer<typeof GetShortVideosFromChannelInputSchema>;
 
-const GetShortVideosFromChannelOutputSchema = z.array(z.string()).describe('A list of YouTube video IDs.');
+const ShortVideoInfoSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    thumbnailUrl: z.string(),
+    channelTitle: z.string(),
+  });
+export type ShortVideoInfo = z.infer<typeof ShortVideoInfoSchema>;
+  
+const GetShortVideosFromChannelOutputSchema = z.array(ShortVideoInfoSchema);
 export type GetShortVideosFromChannelOutput = z.infer<typeof GetShortVideosFromChannelOutputSchema>;
+
 
 // Helper function to parse ISO 8601 duration
 function parseISO8601Duration(duration: string): number {
@@ -75,11 +84,11 @@ const getShortVideosFromChannelFlow = ai.defineFlow(
         nextPageToken = playlistData.nextPageToken;
     } while (nextPageToken);
 
-    // 3. Fetch video details in batches of 50 to get durations
-    const shortVideoIds: string[] = [];
+    // 3. Fetch video details in batches of 50 to get durations and snippets
+    const shortVideos: GetShortVideosFromChannelOutput = [];
     for (let i = 0; i < allVideoIds.length; i += 50) {
         const videoIdBatch = allVideoIds.slice(i, i + 50);
-        const videoDetailsUrl = `${YOUTUBE_API_BASE_URL}/videos?part=contentDetails&id=${videoIdBatch.join(',')}&key=${apiKey}`;
+        const videoDetailsUrl = `${YOUTUBE_API_BASE_URL}/videos?part=contentDetails,snippet&id=${videoIdBatch.join(',')}&key=${apiKey}`;
         const videoDetailsResponse = await fetch(videoDetailsUrl);
         if (!videoDetailsResponse.ok) {
             console.error('Failed to fetch video details for a batch.');
@@ -87,15 +96,20 @@ const getShortVideosFromChannelFlow = ai.defineFlow(
         }
         const videoDetailsData = await videoDetailsResponse.json();
         
-        // 4. Filter videos by duration (< 120 seconds)
+        // 4. Filter videos by duration (< 120 seconds) and map to output schema
         videoDetailsData.items.forEach((video: any) => {
             const duration = video.contentDetails.duration;
             if (parseISO8601Duration(duration) < 120) {
-                shortVideoIds.push(video.id);
+                shortVideos.push({
+                    id: video.id,
+                    title: video.snippet.title,
+                    thumbnailUrl: video.snippet.thumbnails.default.url,
+                    channelTitle: video.snippet.channelTitle
+                });
             }
         });
     }
     
-    return shortVideoIds;
+    return shortVideos;
   }
 );

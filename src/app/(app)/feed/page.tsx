@@ -9,6 +9,9 @@ import { useState, useEffect } from 'react';
 type Video = {
   id: string; // This will be the document id, which is the youtube video id
   createdAt: string;
+  title: string;
+  thumbnailUrl: string;
+  channelTitle: string;
 };
 
 export default function FeedPage() {
