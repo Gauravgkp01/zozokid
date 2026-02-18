@@ -34,6 +34,7 @@ import { getVideoDetails } from '@/ai/flows/get-video-details-flow';
 import { signOut } from 'firebase/auth';
 import type { Class } from '@/app/teacher-dashboard/page';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -78,6 +79,7 @@ export type ChildProfile = {
 
 export default function ParentDashboardPage() {
     const { user, firestore, auth } = useFirebase();
+    const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [profileToEdit, setProfileToEdit] = useState<ChildProfile | undefined>(undefined);
     const { toast } = useToast();
@@ -279,7 +281,9 @@ export default function ParentDashboardPage() {
 
     const handleLogout = () => {
       if (auth) {
-        signOut(auth);
+        signOut(auth).then(() => {
+          router.push('/login');
+        });
       }
     };
     

@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Tooltip,
   TooltipContent,
@@ -16,10 +16,13 @@ const navItems = [{ href: '/feed', label: 'Feed', icon: Home }];
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const auth = useAuth();
   const handleLogout = () => {
     if (auth) {
-      signOut(auth);
+      signOut(auth).then(() => {
+        router.push('/login');
+      });
     }
   };
 
