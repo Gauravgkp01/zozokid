@@ -9,11 +9,20 @@ import {
 } from '@/components/ui/tooltip';
 import { Icons } from '@/components/icons';
 import { Home, Settings, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 const navItems = [{ href: '/feed', label: 'Feed', icon: Home }];
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const auth = useAuth();
+  const handleLogout = () => {
+    if (auth) {
+      signOut(auth);
+    }
+  };
+
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-card sm:flex">
       <TooltipProvider>
@@ -47,13 +56,13 @@ export function AppSidebar() {
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link
-                href="/login"
+              <button
+                onClick={handleLogout}
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <LogOut className="h-5 w-5" />
                 <span className="sr-only">Logout</span>
-              </Link>
+              </button>
             </TooltipTrigger>
             <TooltipContent side="right">Logout</TooltipContent>
           </Tooltip>

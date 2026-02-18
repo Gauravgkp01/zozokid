@@ -1,13 +1,24 @@
+'use client';
+
 import Link from 'next/link';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export default function TeacherDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const auth = useAuth();
+  const handleLogout = () => {
+    if (auth) {
+      signOut(auth);
+    }
+  };
+
   return (
     <div className="light flex min-h-screen w-full flex-col bg-white">
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
@@ -18,12 +29,10 @@ export default function TeacherDashboardLayout({
         <Button
           variant="outline"
           className="rounded-full border-gray-300 text-foreground"
-          asChild
+          onClick={handleLogout}
         >
-          <Link href="/teacher/login">
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Link>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
         </Button>
       </header>
       <main className="flex-1">{children}</main>

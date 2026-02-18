@@ -30,6 +30,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { YoutubeDiscovery } from '@/components/parent-dashboard/youtube-discovery';
 import { getVideoDetails } from '@/ai/flows/get-video-details-flow';
+import { signOut } from 'firebase/auth';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -73,7 +74,7 @@ export type ChildProfile = {
 };
 
 export default function ParentDashboardPage() {
-    const { user, firestore } = useFirebase();
+    const { user, firestore, auth } = useFirebase();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [profileToEdit, setProfileToEdit] = useState<ChildProfile | undefined>(undefined);
     const { toast } = useToast();
@@ -199,6 +200,12 @@ export default function ParentDashboardPage() {
             setIsClearingFeed(false);
         }
     };
+
+    const handleLogout = () => {
+      if (auth) {
+        signOut(auth);
+      }
+    };
     
   return (
     <div className="light min-h-screen bg-white font-body text-foreground">
@@ -225,13 +232,11 @@ export default function ParentDashboardPage() {
             </Button>
             <Button
                 variant="outline"
-                asChild
-                className="rounded-full border-gray-300 text-foreground"
+                onClick={handleLogout}
+                className="rounded-full border-gray-300 text-foreground px-3 sm:px-4"
             >
-                <Link href="/login" className="px-3 sm:px-4">
                 <LogOut className="h-5 w-5 sm:mr-2" />
                 <span className="hidden sm:inline">Logout</span>
-                </Link>
             </Button>
         </div>
       </header>
