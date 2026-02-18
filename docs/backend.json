@@ -87,11 +87,28 @@
           "type": "string",
           "description": "The name of the class (e.g., 'Morning Group', 'Grade 2 Reading')."
         },
-        "studentIds": {
+        "avatarUrl": {
+          "type": "string",
+          "description": "URL to the class's selected avatar or profile picture.",
+          "format": "uri"
+        },
+        "students": {
           "type": "array",
-          "description": "An array of ChildProfile IDs that belong to this class.",
+          "description": "An array of student identifiers that belong to this class.",
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "studentId": {
+                "type": "string"
+              },
+              "parentId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "studentId",
+              "parentId"
+            ]
           }
         },
         "createdAt": {
@@ -111,6 +128,60 @@
         "name",
         "createdAt",
         "updatedAt"
+      ]
+    },
+    "ClassJoinRequest": {
+      "title": "ClassJoinRequest",
+      "type": "object",
+      "description": "Represents a parent's request for their child to join a teacher's class.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "classId": {
+          "type": "string"
+        },
+        "className": {
+          "type": "string"
+        },
+        "teacherId": {
+          "type": "string"
+        },
+        "parentId": {
+          "type": "string"
+        },
+        "childProfileId": {
+          "type": "string"
+        },
+        "childName": {
+          "type": "string"
+        },
+        "childAvatarUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "denied"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "classId",
+        "className",
+        "teacherId",
+        "parentId",
+        "childProfileId",
+        "childName",
+        "status",
+        "createdAt"
       ]
     },
     "ChildProfile": {
@@ -421,6 +492,16 @@
             "$ref": "#/backend/entities/Class"
           },
           "description": "Global collection of classes created by teachers. Security rules will enforce that only the creating teacher can modify their own classes."
+        }
+      },
+      {
+        "path": "/classJoinRequests/{requestId}",
+        "definition": {
+          "entityName": "ClassJoinRequest",
+          "schema": {
+            "$ref": "#/backend/entities/ClassJoinRequest"
+          },
+          "description": "Stores requests from parents for their children to join a class. Teachers approve/deny these requests."
         }
       },
       {

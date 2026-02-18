@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Users, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Plus, Users, Loader2, ArrowRight } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -29,7 +31,8 @@ export type Class = {
   id: string;
   name: string;
   teacherId: string;
-  studentIds: string[];
+  avatarUrl?: string;
+  students: { studentId: string; parentId: string }[];
 };
 
 export default function TeacherDashboardPage() {
@@ -92,14 +95,21 @@ export default function TeacherDashboardPage() {
                     key={c.id}
                     className="flex items-center justify-between rounded-lg border p-3"
                   >
-                    <div>
-                      <p className="font-bold">{c.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {c.studentIds.length} student(s)
-                      </p>
+                    <div className="flex items-center gap-3">
+                      {c.avatarUrl && (
+                        <Image src={c.avatarUrl} alt={c.name} width={40} height={40} className="rounded-full" />
+                      )}
+                      <div>
+                        <p className="font-bold">{c.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {c.students?.length || 0} student(s)
+                        </p>
+                      </div>
                     </div>
-                    <Button variant="outline" size="sm">
-                      Manage
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/teacher-dashboard/class/${c.id}`}>
+                        Manage <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
                     </Button>
                   </div>
                 ))}

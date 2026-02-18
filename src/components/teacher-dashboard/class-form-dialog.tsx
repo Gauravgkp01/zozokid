@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,15 +25,23 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useFirebase, addDocumentNonBlocking } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { cn } from '@/lib/utils';
 
 const classSchema = z.object({
   name: z
     .string()
     .min(2, { message: 'Class name must be at least 2 characters.' }),
+  avatarUrl: z.string().url({ message: 'Please select an avatar.' }),
 });
+
+const classAvatars = PlaceHolderImages.filter((p) =>
+  ['avatar-book', 'avatar-apple', 'avatar-abc', 'avatar-globe'].includes(p.id)
+);
 
 interface ClassFormDialogProps {
   open: boolean;
@@ -46,6 +55,7 @@ export function ClassFormDialog({ open, onOpenChange }: ClassFormDialogProps) {
     resolver: zodResolver(classSchema),
     defaultValues: {
       name: '',
+      avatarUrl: classAvatars[0]?.imageUrl,
     },
   });
 
@@ -62,7 +72,8 @@ export function ClassFormDialog({ open, onOpenChange }: ClassFormDialogProps) {
     const classData = {
       teacherId: user.uid,
       name: values.name,
-      studentIds: [], // Student selection will be implemented later
+      avatarUrl: values.avatarUrl,
+      students: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -79,7 +90,10 @@ export function ClassFormDialog({ open, onOpenChange }: ClassFormDialogProps) {
 
   useEffect(() => {
     if (open) {
-      form.reset();
+      form.reset({
+        name: '',
+        avatarUrl: classAvatars[0]?.imageUrl,
+      });
     }
   }, [open, form]);
 
@@ -89,7 +103,7 @@ export function ClassFormDialog({ open, onOpenChange }: ClassFormDialogProps) {
         <DialogHeader>
           <DialogTitle>Create a New Class</DialogTitle>
           <DialogDescription>
-            Enter a name for your new class. You can add students later.
+            Choose a name and avatar for your new class. You can add students later by sharing the class code.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -107,17 +121,40 @@ export function ClassFormDialog({ open, onOpenChange }: ClassFormDialogProps) {
                 </FormItem>
               )}
             />
-
-            <div className="space-y-2">
-              <FormLabel>Add Students</FormLabel>
-              <div className="rounded-md border border-dashed p-4 text-center">
-                <p className="text-sm text-muted-foreground">
-                  No students available to add. Parents must first share their
-                  child's profile with you from their dashboard.
-                </p>
-              </div>
-            </div>
-
+            <FormField
+              control={form.control}
+              name="avatarUrl"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Choose a Class Avatar</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="grid grid-cols-4 gap-4"
+                    >
+                      {classAvatars.map((avatar) => (
+                        <FormItem key={avatar.id} className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value={avatar.imageUrl} className="sr-only" />
+                          </FormControl>
+                          <FormLabel className={cn("cursor-pointer rounded-full border-2 border-transparent transition-all", field.value === avatar.imageUrl && "border-primary ring-2 ring-primary")}>
+                            <Image
+                              src={avatar.imageUrl}
+                              alt={avatar.description}
+                              width={64}
+                              height={64}
+                              className="rounded-full"
+                            />
+                          </FormLabel>
+                        </FormItem>
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="secondary">

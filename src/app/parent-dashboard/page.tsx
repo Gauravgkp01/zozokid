@@ -12,6 +12,7 @@ import {
   Loader2,
   Pencil,
   Trash2,
+  Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,8 +23,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ProfileFormDialog } from '@/components/parent-dashboard/profile-form-dialog';
-import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
-import { collection, doc, writeBatch } from 'firebase/firestore';
+import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
+import { collection, doc, writeBatch, getDoc, updateDoc } from 'firebase/firestore';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
@@ -31,6 +32,8 @@ import { useToast } from '@/hooks/use-toast';
 import { YoutubeDiscovery } from '@/components/parent-dashboard/youtube-discovery';
 import { getVideoDetails } from '@/ai/flows/get-video-details-flow';
 import { signOut } from 'firebase/auth';
+import type { Class } from '@/app/teacher-dashboard/page';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -81,6 +84,9 @@ export default function ParentDashboardPage() {
     const [youtubeLink, setYoutubeLink] = useState('');
     const [isAddingVideo, setIsAddingVideo] = useState(false);
     const [isClearingFeed, setIsClearingFeed] = useState(false);
+    const [classCode, setClassCode] = useState('');
+    const [selectedChildId, setSelectedChildId] = useState('');
+    const [isSendingRequest, setIsSendingRequest] = useState(false);
 
 
     const childProfilesQuery = useMemoFirebase(() => {
@@ -199,6 +205,75 @@ export default function ParentDashboardPage() {
         } finally {
             setIsClearingFeed(false);
         }
+    };
+
+    const handleSendJoinRequest = async () => {
+      if (!user || !firestore || !classCode.trim() || !selectedChildId) {
+        toast({
+          variant: 'destructive',
+          title: 'Missing Information',
+          description: 'Please provide a class code and select a child.',
+        });
+        return;
+      }
+  
+      setIsSendingRequest(true);
+      try {
+        const classRef = doc(firestore, 'classes', classCode.trim());
+        const classSnap = await getDoc(classRef);
+  
+        if (!classSnap.exists()) {
+          throw new Error('Class not found. Please check the code.');
+        }
+  
+        const classData = classSnap.data() as Class;
+        const selectedProfile = profiles?.find(p => p.id === selectedChildId);
+  
+        if (!selectedProfile) {
+          throw new Error('Selected child profile not found.');
+        }
+  
+        // 1. Add join request
+        const joinRequestsRef = collection(firestore, 'classJoinRequests');
+        const requestData = {
+          classId: classSnap.id,
+          className: classData.name,
+          teacherId: classData.teacherId,
+          parentId: user.uid,
+          childProfileId: selectedProfile.id,
+          childName: selectedProfile.name,
+          childAvatarUrl: selectedProfile.avatarUrl || '',
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+        };
+        await addDocumentNonBlocking(joinRequestsRef, requestData);
+  
+        // 2. Grant teacher read access to child profile
+        const childRef = doc(firestore, 'parents', user.uid, 'childProfiles', selectedProfile.id);
+        const currentSharedIds = selectedProfile.sharedWithTeacherIds || [];
+        if (!currentSharedIds.includes(classData.teacherId)) {
+          await updateDoc(childRef, {
+            sharedWithTeacherIds: [...currentSharedIds, classData.teacherId],
+          });
+        }
+  
+        toast({
+          title: 'Request Sent!',
+          description: `A request for ${selectedProfile.name} to join "${classData.name}" has been sent.`,
+        });
+  
+        setClassCode('');
+        setSelectedChildId('');
+      } catch (error) {
+        console.error('Error sending join request:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error Sending Request',
+          description: (error as Error).message || 'An unexpected error occurred.',
+        });
+      } finally {
+        setIsSendingRequest(false);
+      }
     };
 
     const handleLogout = () => {
@@ -371,6 +446,46 @@ export default function ParentDashboardPage() {
           
           <div className="space-y-6">
             <YoutubeDiscovery />
+
+            <Card className="bg-gray-50">
+              <CardHeader>
+                <CardTitle className="text-lg">Join a Class</CardTitle>
+                <CardDescription>
+                  Enter a class code from a teacher to send a join request.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Input
+                    type="text"
+                    placeholder="Enter Class Code"
+                    value={classCode}
+                    onChange={(e) => setClassCode(e.target.value)}
+                  />
+                  <Select value={selectedChildId} onValueChange={setSelectedChildId} disabled={!profiles || profiles.length === 0}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a child to enroll" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profiles?.map((profile) => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                           <div className="flex items-center gap-2">
+                            {profile.avatarUrl && (
+                                <Image src={profile.avatarUrl} alt={profile.name} width={24} height={24} className="rounded-full" />
+                            )}
+                            <span>{profile.name}</span>
+                           </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={handleSendJoinRequest} disabled={isSendingRequest || !classCode || !selectedChildId} className="w-full">
+                  {isSendingRequest ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                  Send Join Request
+                </Button>
+              </CardContent>
+            </Card>
 
             <Card className="bg-gray-50">
               <CardHeader>

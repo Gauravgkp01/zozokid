@@ -59,6 +59,30 @@
       "description": "A cartoon robot avatar.",
       "imageUrl": "https://images.unsplash.com/photo-1543955946-8d33e764d8f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjYXJ0b29uJTIwcm9ib3R8ZW58MHx8fHwxNzcxMTgzNzg1fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "cartoon robot"
+    },
+    {
+      "id": "avatar-book",
+      "description": "An open book icon.",
+      "imageUrl": "https://images.unsplash.com/photo-1553830591-42e4fd7035ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxib29rJTIwaWNvbnxlbnwwfHx8fDE3NzE0MzgxNTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "book icon"
+    },
+    {
+      "id": "avatar-apple",
+      "description": "An apple icon.",
+      "imageUrl": "https://images.unsplash.com/photo-1683029240907-1b195812422c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YXBwbGUlMjBpY29ufGVufDB8fHx8MTc3MTQzODE1Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "apple icon"
+    },
+    {
+      "id": "avatar-abc",
+      "description": "ABC blocks icon.",
+      "imageUrl": "https://images.unsplash.com/photo-1558907353-ceb54f3882ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYmMlMjBibG9ja3N8ZW58MHx8fHwxNzcxNDM4MTUyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abc blocks"
+    },
+    {
+      "id": "avatar-globe",
+      "description": "A globe icon.",
+      "imageUrl": "https://images.unsplash.com/photo-1611138303103-736fc797080f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxnbG9iZSUyMGljb258ZW58MHx8fHwxNzcxNDM4MTUyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "globe icon"
     }
   ]
 }
