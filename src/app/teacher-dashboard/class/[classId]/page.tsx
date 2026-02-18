@@ -13,6 +13,7 @@ import {
   Check,
   X,
   Video as VideoIcon,
+  Trash2,
 } from 'lucide-react';
 import {
   useFirebase,
@@ -28,6 +29,7 @@ import {
   getDoc,
   writeBatch,
   arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
@@ -57,10 +59,12 @@ type ClassJoinRequest = {
   viewers: string[];
 };
 
-function StudentList({ students }: { students: { studentId: string; parentId: string }[] }) {
+function StudentList({ students, classData }: { students: { studentId: string; parentId: string }[], classData: Class }) {
   const { firestore } = useFirebase();
   const [studentProfiles, setStudentProfiles] = useState<ChildProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRemoving, setIsRemoving] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!firestore || students.length === 0) {
@@ -85,6 +89,44 @@ function StudentList({ students }: { students: { studentId: string; parentId: st
     fetchStudentProfiles();
   }, [students, firestore]);
 
+  const handleRemoveStudent = async (profile: ChildProfile) => {
+    if (!firestore || !classData) return;
+    setIsRemoving(profile.id);
+
+    try {
+        const batch = writeBatch(firestore);
+
+        // 1. Remove student from class's students array
+        const classRef = doc(firestore, 'classes', classData.id);
+        const studentToRemove = { studentId: profile.id, parentId: profile.parentId };
+        batch.update(classRef, {
+            students: arrayRemove(studentToRemove)
+        });
+
+        // 2. Remove teacherId from child's sharedWithTeacherIds array
+        const childProfileRef = doc(firestore, 'parents', profile.parentId, 'childProfiles', profile.id);
+        batch.update(childProfileRef, {
+            sharedWithTeacherIds: arrayRemove(classData.teacherId)
+        });
+
+        await batch.commit();
+
+        toast({
+            title: "Student Removed",
+            description: `${profile.name} has been removed from the class.`
+        });
+    } catch (error) {
+        console.error("Error removing student: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not remove the student."
+        });
+    } finally {
+        setIsRemoving(null);
+    }
+  };
+
   if (isLoading) {
     return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
@@ -106,9 +148,15 @@ function StudentList({ students }: { students: { studentId: string; parentId: st
                         <p className="text-xs text-muted-foreground">Age: {profile.age}</p>
                     </div>
                 </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/parent-dashboard/analytics/${profile.id}`}>View Analytics</Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/parent-dashboard/analytics/${profile.id}`}>View Analytics</Link>
+                    </Button>
+                    <Button variant="destructive" size="icon" onClick={() => handleRemoveStudent(profile)} disabled={isRemoving === profile.id}>
+                      {isRemoving === profile.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      <span className="sr-only">Remove Student</span>
+                    </Button>
+                </div>
             </div>
         ))}
     </div>
@@ -251,7 +299,7 @@ export default function ClassDetailsPage() {
                     <CardDescription>The list of students currently in this class.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <StudentList students={classData.students || []} />
+                    <StudentList students={classData.students || []} classData={classData} />
                 </CardContent>
             </Card>
         </TabsContent>
