@@ -28,7 +28,6 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { ContentPreferences } from '@/components/parent-dashboard/content-preferences';
 import { YoutubeDiscovery } from '@/components/parent-dashboard/youtube-discovery';
 
 const ZoZoKidLogo = () => (
@@ -329,18 +328,6 @@ export default function ParentDashboardPage() {
                   <Button onClick={handleAddVideo}>Add Video</Button>
                 </div>
               </CardContent>
-            </Card>
-
-             <Card className="bg-gray-50">
-                <CardHeader>
-                    <CardTitle className="text-lg">Content Preferences</CardTitle>
-                    <CardDescription>
-                    Manage allowed channels and content categories for your account.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ContentPreferences />
-                </CardContent>
             </Card>
           </div>
         </div>

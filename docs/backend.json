@@ -28,21 +28,6 @@
           "type": "string",
           "description": "Timestamp indicating when the parent profile was last updated.",
           "format": "date-time"
-        },
-        "allowedChannelUrls": {
-          "type": "array",
-          "description": "A global list of YouTube channel URLs that are explicitly allowed for all child profiles under this parent.",
-          "items": {
-            "type": "string",
-            "format": "uri"
-          }
-        },
-        "allowedContentTypes": {
-          "type": "array",
-          "description": "A global list of content category names that are explicitly allowed for all child profiles under this parent.",
-          "items": {
-            "type": "string"
-          }
         }
       },
       "required": [
