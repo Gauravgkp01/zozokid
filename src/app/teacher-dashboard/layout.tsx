@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LogOut } from 'lucide-react';
+import { LogOut, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useAuth } from '@/firebase';
@@ -30,14 +30,26 @@ export default function TeacherDashboardLayout({
           <Icons.logo className="h-8 w-8 text-primary" />
           <h1 className="text-xl font-bold text-foreground">ZoZoKid Teacher</h1>
         </div>
-        <Button
-          variant="outline"
-          className="rounded-full border-gray-300 text-foreground"
-          onClick={handleLogout}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            asChild
+            variant="outline"
+            className="rounded-full border-gray-300 text-foreground"
+          >
+            <Link href="/parent-dashboard">
+              <Users className="mr-2 h-4 w-4" />
+              Parent View
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-full border-gray-300 text-foreground"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </header>
       <main className="flex-1">{children}</main>
     </div>
