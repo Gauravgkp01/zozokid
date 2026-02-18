@@ -20,6 +20,7 @@ import {
   useDoc,
   useCollection,
   useMemoFirebase,
+  addDocumentNonBlocking,
 } from '@/firebase';
 import {
   collection,
@@ -198,7 +199,7 @@ export default function ClassDetailsPage() {
   };
 
   const handleRequest = async (request: ClassJoinRequest, newStatus: 'approved' | 'denied') => {
-    if (!firestore || !classData) return;
+    if (!firestore || !classData || !user) return;
 
     try {
         const batch = writeBatch(firestore);
@@ -219,6 +220,17 @@ export default function ClassDetailsPage() {
         }
 
         await batch.commit();
+
+        // Create notification for parent
+        const parentNotificationsRef = collection(firestore, 'parents', request.parentId, 'notifications');
+        const parentNotificationData = {
+            userId: request.parentId,
+            message: `Your request for ${request.childName} to join "${classData.name}" has been ${newStatus}.`,
+            link: '/parent-dashboard',
+            isRead: false,
+            createdAt: new Date().toISOString(),
+        };
+        addDocumentNonBlocking(parentNotificationsRef, parentNotificationData);
 
         toast({
             title: `Request ${newStatus}`,
@@ -347,3 +359,5 @@ export default function ClassDetailsPage() {
     </div>
   );
 }
+
+    

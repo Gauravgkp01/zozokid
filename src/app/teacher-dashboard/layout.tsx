@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { LogOut, Users, Bell } from 'lucide-react';
+import { LogOut, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 export default function TeacherDashboardLayout({
   children,
@@ -31,14 +32,7 @@ export default function TeacherDashboardLayout({
           <h1 className="text-xl font-bold text-foreground">ZoZoKid Teacher</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full border-gray-300 text-foreground"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="sr-only">Notifications</span>
-          </Button>
+          <NotificationBell userType="teacher" />
           <Button
             asChild
             variant="outline"
@@ -63,3 +57,5 @@ export default function TeacherDashboardLayout({
     </div>
   );
 }
+
+    

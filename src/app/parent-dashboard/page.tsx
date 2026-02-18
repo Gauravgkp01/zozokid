@@ -13,7 +13,6 @@ import {
   Pencil,
   Trash2,
   Send,
-  Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,6 +36,7 @@ import type { Class } from '@/app/teacher-dashboard/page';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { ChildClassesList } from '@/components/parent-dashboard/child-classes-list';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -286,6 +286,17 @@ export default function ParentDashboardPage() {
           });
         }
   
+        // 3. Create notification for teacher
+        const teacherNotificationsRef = collection(firestore, 'teachers', classData.teacherId, 'notifications');
+        const teacherNotificationData = {
+            userId: classData.teacherId,
+            message: `${selectedProfile.name} has requested to join your class "${classData.name}".`,
+            link: `/teacher-dashboard/class/${classSnap.id}`,
+            isRead: false,
+            createdAt: new Date().toISOString(),
+        };
+        addDocumentNonBlocking(teacherNotificationsRef, teacherNotificationData);
+
         toast({
           title: 'Request Sent!',
           description: `A request for ${selectedProfile.name} to join "${classData.name}" has been sent.`,
@@ -326,14 +337,7 @@ export default function ParentDashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-            <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full border-gray-300 text-foreground"
-            >
-                <Bell className="h-5 w-5" />
-                <span className="sr-only">Notifications</span>
-            </Button>
+            <NotificationBell userType="parent" />
             <Button
                 variant="outline"
                 asChild
@@ -587,3 +591,5 @@ export default function ParentDashboardPage() {
     </div>
   );
 }
+
+    
