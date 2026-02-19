@@ -156,8 +156,8 @@ export default function TeacherDashboardPage() {
             <div className="flex items-start gap-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">2</div>
                 <div>
-                    <h4 className="font-semibold">Share the Class Code</h4>
-                    <p className="text-muted-foreground">After creating a class, click "Manage". You'll find a unique class code. Use the "Share Code" button to send it to parents.</p>
+                    <h4 className="font-semibold">Manage Class & Share Code</h4>
+                    <p className="text-muted-foreground">After clicking on the Manage class button you will be directed to your created class where you can find the list of student Join request and feed management section and their is a share button which you can click to share the class code either by copying or directly sharing to parents.</p>
                 </div>
             </div>
             <div className="flex items-start gap-4">
