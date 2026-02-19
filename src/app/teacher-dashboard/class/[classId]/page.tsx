@@ -297,7 +297,7 @@ export default function ClassDetailsPage() {
       </Card>
 
       <Tabs defaultValue="students">
-        <TabsList className="grid w-full grid-cols-1 h-auto sm:grid-cols-3 sm:h-10">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="students">
             <Users className="mr-2 h-4 w-4" /> Students ({classData.students?.length || 0})
           </TabsTrigger>
