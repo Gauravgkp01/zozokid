@@ -140,13 +140,40 @@ export default function TeacherDashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Welcome, Teacher!</CardTitle>
+            <CardTitle>How ZoZoKid Works for Teachers</CardTitle>
             <CardDescription>
-              This is your dedicated dashboard. More features coming soon!
+              A simple guide to get you started with your classes.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p>You can manage your classes and students from here.</p>
+          <CardContent className="space-y-4 text-sm">
+            <div className="flex items-start gap-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">1</div>
+                <div>
+                    <h4 className="font-semibold">Create Your Class</h4>
+                    <p className="text-muted-foreground">Click the "Create New Class" button. Give your class a name and an avatar to get started.</p>
+                </div>
+            </div>
+            <div className="flex items-start gap-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">2</div>
+                <div>
+                    <h4 className="font-semibold">Share the Class Code</h4>
+                    <p className="text-muted-foreground">After creating a class, click "Manage". You'll find a unique class code. Use the "Share Code" button to send it to parents.</p>
+                </div>
+            </div>
+            <div className="flex items-start gap-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">3</div>
+                <div>
+                    <h4 className="font-semibold">Parents Enroll Their Child</h4>
+                    <p className="text-muted-foreground">Parents enter this code in their dashboard to request that their child join your class.</p>
+                </div>
+            </div>
+             <div className="flex items-start gap-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">4</div>
+                <div>
+                    <h4 className="font-semibold">Approve Requests</h4>
+                    <p className="text-muted-foreground">You’ll see new join requests on the class page. Approve them to add students to your class and start sharing content!</p>
+                </div>
+            </div>
           </CardContent>
         </Card>
       </div>
