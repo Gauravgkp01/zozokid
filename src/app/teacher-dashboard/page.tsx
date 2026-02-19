@@ -35,6 +35,7 @@ import {
   writeBatch,
   getDocs,
   arrayRemove,
+  type WriteBatch,
 } from 'firebase/firestore';
 import {
   AlertDialog,
@@ -124,7 +125,20 @@ export default function TeacherDashboardPage() {
     setIsDeleting(classToDelete.id);
 
     try {
-      const batch = writeBatch(firestore);
+      const batches: WriteBatch[] = [writeBatch(firestore)];
+      let currentBatch = batches[0];
+      let operationCount = 0;
+      const MAX_OPS_PER_BATCH = 499; // Firestore limit is 500
+
+      const addOperation = () => {
+        if (operationCount === MAX_OPS_PER_BATCH) {
+          const newBatch = writeBatch(firestore);
+          batches.push(newBatch);
+          currentBatch = newBatch;
+          operationCount = 0;
+        }
+        operationCount++;
+      };
 
       // Step 1: Aggregate all video IDs to be deleted from student queues
       if (
@@ -150,10 +164,11 @@ export default function TeacherDashboardPage() {
           videos.forEach((video) => videoIdsToDelete.add(video.id));
         }
 
-        // Add deletion operations to the batch
+        // Add deletion operations to the batch for each student
         if (videoIdsToDelete.size > 0) {
           classToDelete.students.forEach((student) => {
             videoIdsToDelete.forEach((videoId) => {
+              addOperation();
               const videoRef = doc(
                 firestore,
                 'parents',
@@ -161,7 +176,7 @@ export default function TeacherDashboardPage() {
                 'videoQueue',
                 videoId
               );
-              batch.delete(videoRef);
+              currentBatch.delete(videoRef);
             });
           });
         }
@@ -170,6 +185,7 @@ export default function TeacherDashboardPage() {
       // Step 2: Remove teacher access from child profiles
       if (classToDelete.students && classToDelete.students.length > 0) {
         classToDelete.students.forEach((student) => {
+          addOperation();
           const childProfileRef = doc(
             firestore,
             'parents',
@@ -177,7 +193,7 @@ export default function TeacherDashboardPage() {
             'childProfiles',
             student.studentId
           );
-          batch.update(childProfileRef, {
+          currentBatch.update(childProfileRef, {
             sharedWithTeacherIds: arrayRemove(classToDelete.teacherId),
           });
         });
@@ -189,13 +205,18 @@ export default function TeacherDashboardPage() {
         where('classId', '==', classToDelete.id)
       );
       const requestsSnapshot = await getDocs(requestsQuery);
-      requestsSnapshot.forEach((requestDoc) => batch.delete(requestDoc.ref));
+      requestsSnapshot.forEach((requestDoc) => {
+        addOperation();
+        currentBatch.delete(requestDoc.ref);
+      });
 
       // Step 4: Delete the class document itself
+      addOperation();
       const classRef = doc(firestore, 'classes', classToDelete.id);
-      batch.delete(classRef);
+      currentBatch.delete(classRef);
 
-      await batch.commit();
+      // Commit all batches
+      await Promise.all(batches.map((batch) => batch.commit()));
 
       toast({
         title: 'Class Deleted',
@@ -213,6 +234,7 @@ export default function TeacherDashboardPage() {
       setIsDeleting(null);
     }
   };
+
 
   return (
     <div className="flex-1 bg-white">
