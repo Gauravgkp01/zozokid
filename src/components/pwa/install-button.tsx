@@ -6,19 +6,30 @@ import { Download } from 'lucide-react';
 
 export function InstallPwaButton() {
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       setInstallPrompt(e);
     };
 
+    const handleAppInstalled = () => {
+      setInstallPrompt(null);
+      setIsAppInstalled(true);
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Check if the app is already running in standalone mode (installed)
+    if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) {
+      setIsAppInstalled(true);
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -26,15 +37,17 @@ export function InstallPwaButton() {
     if (!installPrompt) {
       return;
     }
-    // Show the install prompt
-    (installPrompt as any).prompt();
-    // Wait for the user to respond to the prompt
-    const { outcome } = await (installPrompt as any).userChoice;
-    // We've used the prompt, and it can't be used again, so nullify it
-    setInstallPrompt(null);
+    const promptEvent = installPrompt as any;
+    promptEvent.prompt();
+    const { outcome } = await promptEvent.userChoice;
+    // The prompt can only be used once.
+    if(outcome === 'accepted' || outcome === 'dismissed') {
+        setInstallPrompt(null);
+    }
   };
 
-  if (!installPrompt) {
+  // If the app is already installed, don't show the button.
+  if (isAppInstalled) {
     return null;
   }
 
@@ -42,6 +55,8 @@ export function InstallPwaButton() {
     <Button
       variant="outline"
       onClick={handleInstallClick}
+      disabled={!installPrompt}
+      title={!installPrompt ? "App installation is not available in this browser." : "Install App"}
       className="rounded-full border-gray-300 text-foreground px-3 sm:px-4"
     >
       <Download className="h-5 w-5 sm:mr-2" />
