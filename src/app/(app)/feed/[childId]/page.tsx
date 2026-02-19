@@ -91,8 +91,8 @@ export default function FeedPage() {
   }, [user, firestore]);
 
   const handleVideoVisible = (index: number) => {
-    // Load more when the user is 2 videos away from the end
-    if (index >= videos.length - 3 && hasMore && !isLoading) {
+    // Load more when the user is 5 videos away from the end for smoother scrolling
+    if (index >= videos.length - 5 && hasMore && !isLoading) {
       loadMoreVideos();
     }
   };
@@ -139,5 +139,3 @@ export default function FeedPage() {
     </div>
   );
 }
-
-    
