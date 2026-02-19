@@ -175,6 +175,13 @@ export default function ClassDetailsPage() {
   const params = useParams();
   const classId = params.classId as string;
   const { toast } = useToast();
+  const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && navigator.share) {
+      setCanShare(true);
+    }
+  }, []);
 
   const classRef = useMemoFirebase(() => {
     if (!firestore || !classId) return null;
@@ -200,6 +207,29 @@ export default function ClassDetailsPage() {
     toast({ title: 'Class Code Copied!', description: 'You can now share this code with parents.' });
   };
 
+  const handleShare = async () => {
+    if (!classData) return;
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Join my ZoZoKid Class',
+                text: `Join class "${classData.name}" on ZoZoKid with this code: ${classId}`,
+            });
+        } catch (error) {
+            if ((error as DOMException).name !== 'AbortError') {
+                console.error('Error sharing:', error);
+                toast({
+                   variant: 'destructive',
+                   title: 'Could not share',
+                   description: 'An unexpected error occurred.',
+                });
+            }
+        }
+    } else {
+        copyClassCode();
+    }
+  };
+
   const handleRequest = async (request: ClassJoinRequest, newStatus: 'approved' | 'denied') => {
     if (!firestore || !classData || !user) return;
 
@@ -213,7 +243,6 @@ export default function ClassDetailsPage() {
             const classRef = doc(firestore, 'classes', classId);
             const studentData = { studentId: request.childProfileId, parentId: request.parentId };
             
-            // Check if student is already in the class
             if (!classData.students?.some(s => s.studentId === studentData.studentId)) {
                 batch.update(classRef, {
                     students: arrayUnion(studentData)
@@ -223,7 +252,6 @@ export default function ClassDetailsPage() {
 
         await batch.commit();
 
-        // Create notification for parent
         const parentNotificationsRef = collection(firestore, 'parents', request.parentId, 'notifications');
         const parentNotificationData = {
             userId: request.parentId,
@@ -290,9 +318,14 @@ export default function ClassDetailsPage() {
                     <p className="text-sm font-medium">Share this code with parents</p>
                     <div className="flex items-center space-x-2 rounded-lg border bg-muted p-3">
                         <p className="flex-grow font-mono text-lg break-all">{classId}</p>
-                        <Button size="icon" variant="ghost" onClick={copyClassCode} className="shrink-0">
+                        <Button size="icon" variant="ghost" onClick={copyClassCode} className="shrink-0" aria-label="Copy code">
                             <ClipboardCopy className="h-5 w-5" />
                         </Button>
+                        {canShare && (
+                            <Button size="icon" variant="ghost" onClick={handleShare} className="shrink-0" aria-label="Share code">
+                                <Share2 className="h-5 w-5" />
+                            </Button>
+                        )}
                     </div>
                 </div>
             </PopoverContent>
