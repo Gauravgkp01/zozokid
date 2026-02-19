@@ -210,10 +210,12 @@ export default function ClassDetailsPage() {
   const handleShare = async () => {
     if (!classData) return;
     if (navigator.share) {
+        const parentDashboardUrl = `${window.location.origin}/parent-dashboard`;
         try {
             await navigator.share({
                 title: 'Join my ZoZoKid Class',
-                text: `Join class "${classData.name}" on ZoZoKid with this code: ${classId}`,
+                text: `Join my class "${classData.name}" on ZoZoKid with code: ${classId}. Go to your Parent Dashboard to enroll your child.`,
+                url: parentDashboardUrl,
             });
         } catch (error) {
             if ((error as DOMException).name !== 'AbortError') {
