@@ -194,45 +194,67 @@ export default function TeacherDashboardPage() {
                 classes.map((c) => (
                   <div
                     key={c.id}
-                    className="flex items-center justify-between rounded-lg border p-3"
+                    className="flex items-center justify-between rounded-lg border bg-background p-4"
                   >
-                    <div className="flex flex-1 items-center gap-3 overflow-hidden">
+                    <div className="flex flex-1 items-center gap-4 min-w-0">
                       {c.avatarUrl && (
-                        <Image src={c.avatarUrl} alt={c.name} width={40} height={40} className="rounded-full" />
+                        <Image
+                          src={c.avatarUrl}
+                          alt={c.name}
+                          width={40}
+                          height={40}
+                          className="rounded-full shrink-0"
+                        />
                       )}
-                      <div className="overflow-hidden">
-                        <p className="font-bold truncate">{c.name}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold truncate text-foreground">{c.name}</p>
                         <p className="text-sm text-muted-foreground">
                           {c.students?.length || 0} student(s)
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                        <Button asChild variant="outline" size="sm">
-                          <Link href={`/teacher-dashboard/class/${c.id}`}>
-                            Manage <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                              <Button variant="destructive" size="icon" disabled={isDeleting === c.id}>
-                                {isDeleting === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                              </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="light">
-                              <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                  This will permanently delete the class "{c.name}", remove all students, and delete all content you've added from their feeds. This action cannot be undone.
-                              </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteClass(c)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                  Delete
-                              </AlertDialogAction>
-                              </AlertDialogFooter>
-                          </AlertDialogContent>
+                    <div className="flex items-center gap-2 shrink-0 ml-4">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/teacher-dashboard/class/${c.id}`}>
+                          Manage <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            disabled={isDeleting === c.id}
+                          >
+                            {isDeleting === c.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="light">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete the class "{c.name}",
+                              remove all students, and delete all content
+                              you've added from their feeds. This action cannot
+                              be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteClass(c)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
                       </AlertDialog>
                     </div>
                   </div>
