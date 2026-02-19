@@ -306,7 +306,7 @@ export default function ClassDetailsPage() {
             {classData.avatarUrl && (
                 <Image src={classData.avatarUrl} alt={classData.name} width={40} height={40} className="rounded-full hidden sm:block" />
             )}
-            <h1 className="text-2xl font-bold sm:text-3xl truncate">{classData.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground sm:text-3xl truncate">{classData.name}</h1>
         </div>
         <Popover>
             <PopoverTrigger asChild>
