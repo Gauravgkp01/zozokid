@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Plus, Users, Loader2, ArrowRight } from 'lucide-react';
+import { Plus, Users, Loader2, ArrowRight, Trash2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -25,7 +25,23 @@ import {
   getDoc,
   query,
   where,
+  writeBatch,
+  getDocs,
+  arrayRemove,
 } from 'firebase/firestore';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { getShortVideosFromChannel } from '@/ai/flows/get-short-videos-from-channel-flow';
 
 export type AddedContent = {
   type: 'video' | 'channel';
@@ -47,6 +63,8 @@ export type Class = {
 export default function TeacherDashboardPage() {
   const { user, firestore } = useFirebase();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!user || !firestore) return;
@@ -78,6 +96,80 @@ export default function TeacherDashboardPage() {
 
   const { data: classes, isLoading } = useCollection<Class>(classesQuery);
 
+  const handleDeleteClass = async (classToDelete: Class) => {
+    if (!firestore || !user) {
+        toast({ variant: 'destructive', title: 'You must be logged in.' });
+        return;
+    }
+    setIsDeleting(classToDelete.id);
+
+    try {
+        const batch = writeBatch(firestore);
+
+        // Step 1: Aggregate all video IDs to be deleted from student queues
+        if (classToDelete.content && classToDelete.content.length > 0 && classToDelete.students && classToDelete.students.length > 0) {
+            const videoIdsToDelete = new Set<string>();
+
+            const channelContent = classToDelete.content.filter(item => item.type === 'channel');
+            const videoContent = classToDelete.content.filter(item => item.type === 'video');
+            
+            videoContent.forEach(item => videoIdsToDelete.add(item.id));
+
+            // Fetch video IDs for each channel. This involves network requests.
+            for (const channelItem of channelContent) {
+                const videos = await getShortVideosFromChannel(channelItem.id);
+                videos.forEach(video => videoIdsToDelete.add(video.id));
+            }
+
+            // Add deletion operations to the batch
+            if (videoIdsToDelete.size > 0) {
+                classToDelete.students.forEach(student => {
+                    videoIdsToDelete.forEach(videoId => {
+                        const videoRef = doc(firestore, 'parents', student.parentId, 'videoQueue', videoId);
+                        batch.delete(videoRef);
+                    });
+                });
+            }
+        }
+        
+        // Step 2: Remove teacher access from child profiles
+        if (classToDelete.students && classToDelete.students.length > 0) {
+           classToDelete.students.forEach(student => {
+                 const childProfileRef = doc(firestore, 'parents', student.parentId, 'childProfiles', student.studentId);
+                 batch.update(childProfileRef, {
+                    sharedWithTeacherIds: arrayRemove(classToDelete.teacherId)
+                 });
+            })
+        }
+
+        // Step 3: Delete pending join requests for this class
+        const requestsQuery = query(collection(firestore, 'classJoinRequests'), where('classId', '==', classToDelete.id));
+        const requestsSnapshot = await getDocs(requestsQuery);
+        requestsSnapshot.forEach(requestDoc => batch.delete(requestDoc.ref));
+
+        // Step 4: Delete the class document itself
+        const classRef = doc(firestore, 'classes', classToDelete.id);
+        batch.delete(classRef);
+        
+        await batch.commit();
+
+        toast({
+            title: 'Class Deleted',
+            description: `"${classToDelete.name}" and all associated data have been removed.`,
+        });
+
+    } catch (error) {
+        console.error('Error deleting class:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Error Deleting Class',
+            description: (error as Error).message || 'An unexpected error occurred.',
+        });
+    } finally {
+        setIsDeleting(null);
+    }
+  };
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -104,22 +196,45 @@ export default function TeacherDashboardPage() {
                     key={c.id}
                     className="flex items-center justify-between rounded-lg border p-3"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-1 items-center gap-3 overflow-hidden">
                       {c.avatarUrl && (
                         <Image src={c.avatarUrl} alt={c.name} width={40} height={40} className="rounded-full" />
                       )}
-                      <div>
-                        <p className="font-bold">{c.name}</p>
+                      <div className="overflow-hidden">
+                        <p className="font-bold truncate">{c.name}</p>
                         <p className="text-sm text-muted-foreground">
                           {c.students?.length || 0} student(s)
                         </p>
                       </div>
                     </div>
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/teacher-dashboard/class/${c.id}`}>
-                        Manage <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/teacher-dashboard/class/${c.id}`}>
+                            Manage <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="icon" disabled={isDeleting === c.id}>
+                                {isDeleting === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                              </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="light">
+                              <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  This will permanently delete the class "{c.name}", remove all students, and delete all content you've added from their feeds. This action cannot be undone.
+                              </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteClass(c)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Delete
+                              </AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 ))}
               {!isLoading && (!classes || classes.length === 0) && (
@@ -156,7 +271,7 @@ export default function TeacherDashboardPage() {
             <div className="flex items-start gap-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">2</div>
                 <div>
-                    <h4 className="font-semibold">Manage Class & Share Code</h4>
+                    <h4 className="font-semibold">Share the Class Code</h4>
                     <p className="text-muted-foreground">After clicking on the Manage class button you will be directed to your created class where you can find the list of student Join request and feed management section and their is a share button which you can click to share the class code either by copying or directly sharing to parents.</p>
                 </div>
             </div>
