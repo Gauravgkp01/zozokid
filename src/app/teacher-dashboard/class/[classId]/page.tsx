@@ -143,8 +143,8 @@ function StudentList({ students, classData }: { students: { studentId: string; p
   return (
     <div className="space-y-3">
         {studentProfiles.map(profile => (
-            <div key={profile.id} className="flex items-center justify-between rounded-lg border p-3">
-                <div className="flex items-center gap-3">
+            <div key={profile.id} className="flex flex-col items-start gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:gap-3">
+                <div className="flex flex-1 items-center gap-3">
                     {profile.avatarUrl && (
                         <Image src={profile.avatarUrl} alt={profile.name} width={40} height={40} className="rounded-full" />
                     )}
@@ -153,8 +153,8 @@ function StudentList({ students, classData }: { students: { studentId: string; p
                         <p className="text-xs text-muted-foreground">Age: {profile.age}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" asChild>
+                <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+                    <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-auto">
                       <Link href={`/parent-dashboard/analytics/${profile.id}`}>View Analytics</Link>
                     </Button>
                     <Button variant="destructive" size="icon" onClick={() => handleRemoveStudent(profile)} disabled={isRemoving === profile.id}>
@@ -264,8 +264,8 @@ export default function ClassDetailsPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <header className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon">
+      <header className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+        <Button asChild variant="outline" size="icon" className="shrink-0">
           <Link href="/teacher-dashboard">
             <ArrowLeft className="h-4 w-4" />
           </Link>
@@ -274,9 +274,9 @@ export default function ClassDetailsPage() {
             {classData.avatarUrl && (
                 <Image src={classData.avatarUrl} alt={classData.name} width={48} height={48} className="rounded-full" />
             )}
-            <div>
-                <h1 className="text-2xl font-bold">{classData.name}</h1>
-                <p className="text-muted-foreground">Manage your class details, students, and join requests.</p>
+            <div className="flex-1">
+                <h1 className="text-xl font-bold sm:text-2xl">{classData.name}</h1>
+                <p className="text-sm text-muted-foreground">Manage your class details, students, and join requests.</p>
             </div>
         </div>
       </header>
@@ -288,8 +288,8 @@ export default function ClassDetailsPage() {
         </CardHeader>
         <CardContent>
             <div className="flex items-center space-x-2 rounded-lg border bg-muted p-3">
-                <p className="flex-grow font-mono text-sm">{classId}</p>
-                <Button size="icon" variant="ghost" onClick={copyClassCode}>
+                <p className="flex-grow font-mono text-sm break-all">{classId}</p>
+                <Button size="icon" variant="ghost" onClick={copyClassCode} className="shrink-0">
                     <ClipboardCopy className="h-5 w-5" />
                 </Button>
             </div>
@@ -297,7 +297,7 @@ export default function ClassDetailsPage() {
       </Card>
 
       <Tabs defaultValue="students">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-1 h-auto sm:grid-cols-3 sm:h-10">
           <TabsTrigger value="students">
             <Users className="mr-2 h-4 w-4" /> Students ({classData.students?.length || 0})
           </TabsTrigger>
@@ -329,14 +329,14 @@ export default function ClassDetailsPage() {
                     {isLoadingRequests && <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>}
                     {!isLoadingRequests && joinRequests && joinRequests.length > 0 ? (
                         joinRequests.map(req => (
-                            <div key={req.id} className="flex items-center justify-between rounded-lg border p-3">
+                            <div key={req.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border p-3">
                                 <div className="flex items-center gap-3">
                                     {req.childAvatarUrl && (
                                         <Image src={req.childAvatarUrl} alt={req.childName} width={40} height={40} className="rounded-full" />
                                     )}
                                     <p className="font-semibold">{req.childName}</p>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 self-end sm:self-center">
                                     <Button size="icon" variant="outline" className="text-green-600 hover:bg-green-50 hover:text-green-700" onClick={() => handleRequest(req, 'approved')}>
                                         <Check className="h-4 w-4" />
                                     </Button>
@@ -359,5 +359,3 @@ export default function ClassDetailsPage() {
     </div>
   );
 }
-
-    
