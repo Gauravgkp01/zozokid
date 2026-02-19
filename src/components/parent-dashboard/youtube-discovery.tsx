@@ -172,7 +172,7 @@ export function YoutubeDiscovery() {
                                     {results.channels.map(channel => (
                                         <div key={channel.id} className="flex items-center gap-3 rounded-lg border p-2">
                                             <Image src={channel.thumbnailUrl} alt={channel.title} width={40} height={40} className="rounded-full" />
-                                            <div className="flex-1">
+                                            <div className="flex-1 min-w-0">
                                                 <p className="font-bold truncate">{channel.title}</p>
                                             </div>
                                             <Button size="sm" onClick={() => handleAddChannel(channel)} disabled={addingChannelId === channel.id}>
@@ -196,9 +196,9 @@ export function YoutubeDiscovery() {
                                     {results.videos.map(video => (
                                         <div key={video.id} className="flex items-center gap-3 rounded-lg border p-2">
                                              <Image src={video.thumbnailUrl} alt={video.title} width={64} height={36} className="rounded-md object-cover" />
-                                             <div className="flex-1">
+                                             <div className="flex-1 min-w-0">
                                                 <p className="font-bold text-sm truncate">{video.title}</p>
-                                                <p className="text-xs text-muted-foreground">{video.channelTitle}</p>
+                                                <p className="text-xs text-muted-foreground truncate">{video.channelTitle}</p>
                                              </div>
                                             <Button size="sm" onClick={() => handleAddVideo(video)}>
                                                 <Video className="mr-2 h-4 w-4" /> Add
@@ -217,5 +217,3 @@ export function YoutubeDiscovery() {
         </Card>
     );
 }
-
-    
