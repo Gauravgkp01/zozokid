@@ -8,6 +8,8 @@ import Script from 'next/script';
 export const metadata: Metadata = {
   title: 'ZoZoKid',
   description: 'A safe reels experience for kids.',
+  manifest: '/manifest.json',
+  themeColor: '#000000',
 };
 
 export default function RootLayout({
