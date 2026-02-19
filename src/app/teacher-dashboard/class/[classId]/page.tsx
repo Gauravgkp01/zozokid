@@ -295,22 +295,22 @@ export default function ClassDetailsPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <header className="flex items-center justify-between gap-4">
+    <div className="flex flex-1 flex-col">
+      <header className="sticky top-16 z-30 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-3 backdrop-blur-sm md:px-8">
         <div className="flex min-w-0 items-center gap-3">
-            <Button asChild variant="outline" size="icon" className="shrink-0">
+            <Button asChild variant="secondary" size="icon" className="shrink-0">
               <Link href="/teacher-dashboard">
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>
             {classData.avatarUrl && (
                 <Image src={classData.avatarUrl} alt={classData.name} width={40} height={40} className="rounded-full hidden sm:block" />
             )}
-            <h1 className="text-xl font-bold sm:text-2xl truncate">{classData.name}</h1>
+            <h1 className="text-2xl font-bold sm:text-3xl truncate">{classData.name}</h1>
         </div>
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="outline" className="shrink-0">
+                <Button variant="default" className="shrink-0">
                     <Share2 className="mr-0 h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Share Code</span>
                 </Button>
@@ -334,66 +334,68 @@ export default function ClassDetailsPage() {
         </Popover>
       </header>
 
-      <Tabs defaultValue="students">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="students">
-            <Users className="mr-2 h-4 w-4" /> Students ({classData.students?.length || 0})
-          </TabsTrigger>
-          <TabsTrigger value="requests">
-            <UserPlus className="mr-2 h-4 w-4" /> Requests ({joinRequests?.length || 0})
-          </TabsTrigger>
-          <TabsTrigger value="content">
-            <VideoIcon className="mr-2 h-4 w-4" /> Add Content
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="students">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Enrolled Students</CardTitle>
-                    <CardDescription>The list of students currently in this class.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <StudentList students={classData.students || []} classData={classData} />
-                </CardContent>
-            </Card>
-        </TabsContent>
-        <TabsContent value="requests">
-            <Card>
-                 <CardHeader>
-                    <CardTitle>Join Requests</CardTitle>
-                    <CardDescription>Approve or deny requests from parents.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {isLoadingRequests && <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>}
-                    {!isLoadingRequests && joinRequests && joinRequests.length > 0 ? (
-                        joinRequests.map(req => (
-                            <div key={req.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border p-3">
-                                <div className="flex items-center gap-3">
-                                    {req.childAvatarUrl && (
-                                        <Image src={req.childAvatarUrl} alt={req.childName} width={40} height={40} className="rounded-full" />
-                                    )}
-                                    <p className="font-semibold">{req.childName}</p>
-                                </div>
-                                <div className="flex items-center gap-2 self-end sm:self-center">
-                                    <Button size="icon" variant="outline" className="text-green-600 hover:bg-green-50 hover:text-green-700" onClick={() => handleRequest(req, 'approved')}>
-                                        <Check className="h-4 w-4" />
-                                    </Button>
-                                    <Button size="icon" variant="outline" className="text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => handleRequest(req, 'denied')}>
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-center text-sm text-muted-foreground p-8">No pending join requests.</p>
-                    )}
-                </CardContent>
-            </Card>
-        </TabsContent>
-        <TabsContent value="content">
-            <ClassContentManager classData={classData} />
-        </TabsContent>
-      </Tabs>
+      <main className="flex-1 space-y-4 p-4 md:p-8">
+        <Tabs defaultValue="students">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="students">
+              <Users className="mr-2 h-4 w-4" /> Students ({classData.students?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="requests">
+              <UserPlus className="mr-2 h-4 w-4" /> Requests ({joinRequests?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="content">
+              <VideoIcon className="mr-2 h-4 w-4" /> Add Content
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="students">
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Enrolled Students</CardTitle>
+                      <CardDescription>The list of students currently in this class.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <StudentList students={classData.students || []} classData={classData} />
+                  </CardContent>
+              </Card>
+          </TabsContent>
+          <TabsContent value="requests">
+              <Card>
+                   <CardHeader>
+                      <CardTitle>Join Requests</CardTitle>
+                      <CardDescription>Approve or deny requests from parents.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                      {isLoadingRequests && <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>}
+                      {!isLoadingRequests && joinRequests && joinRequests.length > 0 ? (
+                          joinRequests.map(req => (
+                              <div key={req.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border p-3">
+                                  <div className="flex items-center gap-3">
+                                      {req.childAvatarUrl && (
+                                          <Image src={req.childAvatarUrl} alt={req.childName} width={40} height={40} className="rounded-full" />
+                                      )}
+                                      <p className="font-semibold">{req.childName}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2 self-end sm:self-center">
+                                      <Button size="icon" variant="outline" className="text-green-600 hover:bg-green-50 hover:text-green-700" onClick={() => handleRequest(req, 'approved')}>
+                                          <Check className="h-4 w-4" />
+                                      </Button>
+                                      <Button size="icon" variant="outline" className="text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => handleRequest(req, 'denied')}>
+                                          <X className="h-4 w-4" />
+                                      </Button>
+                                  </div>
+                              </div>
+                          ))
+                      ) : (
+                          <p className="text-center text-sm text-muted-foreground p-8">No pending join requests.</p>
+                      )}
+                  </CardContent>
+              </Card>
+          </TabsContent>
+          <TabsContent value="content">
+              <ClassContentManager classData={classData} />
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 }
