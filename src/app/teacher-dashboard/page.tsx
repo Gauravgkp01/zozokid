@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Plus, Loader2, ArrowRight, Trash2 } from 'lucide-react';
+import { Plus, Loader2, ArrowRight, Trash2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ClassFormDialog } from '@/components/teacher-dashboard/class-form-dialog';
 import {
@@ -166,7 +166,21 @@ export default function TeacherDashboardPage() {
   return (
     <div className="flex-1 bg-white">
       <div className="p-4 border-b">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Classes</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Teacher Dashboard</h2>
+          <div className="mt-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-4 text-sm">
+            <h3 className="font-bold text-base mb-2">How It Works</h3>
+            <ol className="list-decimal list-inside space-y-2">
+                <li>
+                    <strong>Create a Class:</strong> Click the <Plus className="inline-block h-4 w-4" /> button to set up a new class.
+                </li>
+                <li>
+                    <strong>Manage & Share:</strong> After clicking on a created class, you will be directed to its page where you can find the list of students, join requests, and feed management section. There is a <Share2 className="inline-block h-4 w-4" /> share button which you can click to share the class code either by copying or directly sharing to parents.
+                </li>
+                <li>
+                    <strong>Enroll Students:</strong> Parents use this code to request to join your class. You can approve or deny their requests in the 'Requests' tab for each class.
+                </li>
+            </ol>
+        </div>
       </div>
 
       <div className="flex flex-col">
@@ -249,8 +263,8 @@ export default function TeacherDashboardPage() {
           ))}
         {!isLoading && (!classes || classes.length === 0) && (
           <div className="flex flex-col items-center justify-center p-16 text-center">
-            <h3 className="text-lg font-semibold">No classes yet</h3>
-            <p className="text-muted-foreground mt-1">Click the '+' button to create your first class and get started.</p>
+            <h3 className="text-lg font-semibold">You haven't created any classes yet.</h3>
+            <p className="text-muted-foreground mt-1">Click the '+' button to get started.</p>
           </div>
         )}
       </div>
