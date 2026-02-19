@@ -37,6 +37,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useRouter } from 'next/navigation';
 import { ChildClassesList } from '@/components/parent-dashboard/child-classes-list';
 import { NotificationBell } from '@/components/notifications/notification-bell';
+import { InstallPwaButton } from '@/components/pwa/install-button';
 
 const ZoZoKidLogo = () => (
     <svg
@@ -338,6 +339,7 @@ export default function ParentDashboardPage() {
         </div>
         <div className="flex items-center gap-2">
             <NotificationBell userType="parent" />
+            <InstallPwaButton />
             <Button
                 variant="outline"
                 asChild
@@ -591,5 +593,3 @@ export default function ParentDashboardPage() {
     </div>
   );
 }
-
-    
