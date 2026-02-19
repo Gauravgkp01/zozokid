@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { collection } from 'firebase/firestore';
 import { useFirebase, addDocumentNonBlocking } from '@/firebase';
+import Image from 'next/image';
 
 // Make YT and YT.Player available in the window scope for TypeScript
 declare global {
@@ -10,7 +11,7 @@ declare global {
     onYouTubeIframeAPIReady?: () => void;
     YT?: {
       Player: new (id: string, options: any) => any;
-      PlayerState: { [key: string]: number };
+      PlayerState: { [key:string]: number };
     };
   }
 }
@@ -32,6 +33,7 @@ type VideoReelItemProps = {
   isPlaybackAllowed: boolean;
   index: number;
   onVisible: (index: number) => void;
+  activeIndex: number;
 };
 
 // A global promise to ensure the YouTube IFrame API script is loaded and ready.
@@ -64,6 +66,7 @@ export function VideoReelItem({
   isPlaybackAllowed,
   index,
   onVisible,
+  activeIndex,
 }: VideoReelItemProps) {
   const { firestore } = useFirebase();
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -72,7 +75,11 @@ export function VideoReelItem({
   const startTimeRef = useRef<number | null>(null);
   
   const videoId = video.id;
-  const playerId = `ytplayer-${videoId}-${Math.random().toString(36).substring(7)}`;
+  const playerId = `ytplayer-${videoId}-${index}`; // Ensure player ID is unique per item
+
+  // Determine if this item should have an active player
+  const isNearby = useMemo(() => Math.abs(index - activeIndex) <= 1, [index, activeIndex]);
+  const isActive = useMemo(() => index === activeIndex, [index, activeIndex]);
 
   const onPlayerStateChange = (event: any) => {
     if (!firestore || !childId || !parentId) return;
@@ -114,32 +121,35 @@ export function VideoReelItem({
     }
   };
 
-
+  // Effect for creating/destroying the player
   useEffect(() => {
-    ensureYouTubeApi().then(() => {
-        if (!videoContainerRef.current || playerRef.current) return;
+    if (isNearby) {
+      ensureYouTubeApi().then(() => {
+          if (!videoContainerRef.current || playerRef.current) return;
 
-        playerRef.current = new window.YT.Player(playerId, {
-            videoId: videoId,
-            playerVars: {
-                autoplay: 0,
-                controls: 1,
-                modestbranding: 1,
-                rel: 0,
-                mute: 1, // Player starts muted by default
-                playsinline: 1, // Ensures inline playback on iOS
-            },
-            events: {
-              onReady: (event: any) => {
-                if (isPlaybackAllowed) {
-                  event.target.unMute();
-                }
+          playerRef.current = new window.YT.Player(playerId, {
+              videoId: videoId,
+              playerVars: {
+                  autoplay: 0,
+                  controls: 1,
+                  modestbranding: 1,
+                  rel: 0,
+                  mute: 1, 
+                  playsinline: 1, 
               },
-              onStateChange: onPlayerStateChange,
-            }
-        });
-    });
+              events: {
+                onReady: (event: any) => {
+                  if (isActive && isPlaybackAllowed) {
+                    event.target.unMute();
+                  }
+                },
+                onStateChange: onPlayerStateChange,
+              }
+          });
+      });
+    }
 
+    // Cleanup: destroy player when it's no longer nearby
     return () => {
         if (playerRef.current && typeof playerRef.current.destroy === 'function') {
             playerRef.current.destroy();
@@ -147,31 +157,21 @@ export function VideoReelItem({
         }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId, playerId]);
+  }, [isNearby, videoId, playerId]);
 
 
+  // Effect for controlling visibility
   useEffect(() => {
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
       const entry = entries[0];
-      const player = playerRef.current;
-
-      if (!player || typeof player.playVideo !== 'function') return;
-
       if (entry.isIntersecting) {
         onVisible(index);
-        if (isPlaybackAllowed) {
-            player.unMute();
-        }
-        player.playVideo();
-      } else {
-        // This will trigger the PAUSED state change and log the event
-        player.pauseVideo();
       }
     };
 
     if (videoContainerRef.current) {
         observerRef.current = new IntersectionObserver(handleIntersection, {
-            threshold: 0.75, // Play when 75% of the video is visible
+            threshold: 0.75, // When 75% of the video is visible, it becomes active
         });
         observerRef.current.observe(videoContainerRef.current);
     }
@@ -182,7 +182,22 @@ export function VideoReelItem({
             observerRef.current = null;
         }
     };
-  }, [isPlaybackAllowed, index, onVisible]);
+  }, [index, onVisible]);
+
+  // Effect to play/pause based on `isActive`
+  useEffect(() => {
+    const player = playerRef.current;
+    if (player && typeof player.playVideo === 'function') {
+      if (isActive) {
+        if (isPlaybackAllowed) {
+            player.unMute();
+        }
+        player.playVideo();
+      } else {
+        player.pauseVideo();
+      }
+    }
+  }, [isActive, isPlaybackAllowed]);
 
 
   return (
@@ -191,14 +206,27 @@ export function VideoReelItem({
       className="flex h-screen w-full snap-start items-center justify-center"
     >
       <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg bg-black">
-        {/* Player container - explicitly in the background */}
-        <div className="absolute inset-0 z-0">
-          <div id={playerId} className="h-full w-full" />
-        </div>
+        {isNearby ? (
+          <div className="absolute inset-0 z-0">
+            <div id={playerId} className="h-full w-full" />
+          </div>
+        ) : (
+          <>
+            <Image
+              src={video.thumbnailUrl}
+              alt={video.title}
+              fill
+              className="h-full w-full object-cover"
+              unoptimized
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+              <svg className="h-16 w-16 text-white/70" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>
+            </div>
+          </>
+        )}
         
-        {/* Top-level overlay. It passes clicks through by default... */}
+        {/* Overlay for scrolling and info */}
         <div className="absolute inset-0 z-10 pointer-events-none">
-          {/* ...except for this bottom area, which is for scrolling. */}
           <div className="absolute bottom-0 left-0 right-0 h-1/4 pointer-events-auto bg-gradient-to-t from-black/70 to-transparent">
             <div className="absolute bottom-4 left-4 right-4 text-white">
               <p className="font-bold text-lg drop-shadow-md">{video.channelTitle}</p>

@@ -41,6 +41,7 @@ export default function FeedPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   // On the client, check if the user has already granted permission in this session.
   useEffect(() => {
@@ -90,12 +91,13 @@ export default function FeedPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, firestore]);
 
-  const handleVideoVisible = (index: number) => {
+  const handleVideoVisible = useCallback((index: number) => {
+    setActiveIndex(index);
     // Load more when the user is 5 videos away from the end for smoother scrolling
     if (index >= videos.length - 5 && hasMore && !isLoading) {
       loadMoreVideos();
     }
-  };
+  }, [videos.length, hasMore, isLoading, loadMoreVideos]);
 
   if (initialLoad) {
     return (
@@ -118,6 +120,7 @@ export default function FeedPage() {
               isPlaybackAllowed={isPlaybackAllowed}
               index={index}
               onVisible={handleVideoVisible}
+              activeIndex={activeIndex}
             />
           ))}
           {isLoading && (
