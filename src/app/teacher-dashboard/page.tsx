@@ -257,30 +257,6 @@ export default function TeacherDashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        <div className="mt-6 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-4 text-sm">
-          <h3 className="font-bold text-base mb-2">How It Works</h3>
-          <ol className="list-decimal list-inside space-y-2">
-            <li>
-              <strong>Create a Class:</strong> Click the{' '}
-              <Plus className="inline-block h-4 w-4" /> button to set up a new
-              class.
-            </li>
-            <li>
-              <strong>Manage & Share:</strong> After clicking on a created class,
-              you will be directed to its page where you can find the list of
-              students, join requests, and feed management section. There is a{' '}
-              <Share2 className="inline-block h-4 w-4" /> share button which you
-              can click to share the class code either by copying or directly
-              sharing to parents.
-            </li>
-            <li>
-              <strong>Enroll Students:</strong> Parents use this code to request
-              to join your class. You can approve or deny their requests in the
-              'Requests' tab for each class.
-            </li>
-          </ol>
-        </div>
       </div>
 
       <div className="flex flex-col">
@@ -385,6 +361,32 @@ export default function TeacherDashboardPage() {
             </p>
           </div>
         )}
+      </div>
+
+      <div className="p-4">
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-4 text-sm">
+          <h3 className="font-bold text-base mb-2">How It Works</h3>
+          <ol className="list-decimal list-inside space-y-2">
+            <li>
+              <strong>Create a Class:</strong> Click the{' '}
+              <Plus className="inline-block h-4 w-4" /> button to set up a new
+              class.
+            </li>
+            <li>
+              <strong>Manage & Share:</strong> After clicking on a created class,
+              you will be directed to its page where you can find the list of
+              students, join requests, and feed management section. There is a{' '}
+              <Share2 className="inline-block h-4 w-4" /> share button which you
+              can click to share the class code either by copying or directly
+              sharing to parents.
+            </li>
+            <li>
+              <strong>Enroll Students:</strong> Parents use this code to request
+              to join your class. You can approve or deny their requests in the
+              'Requests' tab for each class.
+            </li>
+          </ol>
+        </div>
       </div>
 
       <Button
