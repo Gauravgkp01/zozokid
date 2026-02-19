@@ -127,6 +127,7 @@ export function VideoReelItem({
                 modestbranding: 1,
                 rel: 0,
                 mute: 1, // Player starts muted by default
+                playsinline: 1, // Ensures inline playback on iOS
             },
             events: {
               onReady: (event: any) => {
@@ -191,6 +192,14 @@ export function VideoReelItem({
     >
       <div className="relative h-full w-full max-w-sm overflow-hidden rounded-lg bg-black">
         <div id={playerId} className="h-full w-full" />
+        
+        {/* This overlay provides a scrollable area at the bottom and displays video info */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black/70 to-transparent">
+          <div className="absolute bottom-4 left-4 right-4 text-white">
+            <p className="font-bold text-lg drop-shadow-md">{video.channelTitle}</p>
+            <p className="mt-1 text-sm drop-shadow-md">{video.title}</p>
+          </div>
+        </div>
       </div>
     </div>
   );
