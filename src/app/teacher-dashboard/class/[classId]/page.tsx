@@ -145,7 +145,7 @@ function StudentList({ students, classData }: { students: { studentId: string; p
   return (
     <div className="space-y-3">
         {studentProfiles.map(profile => (
-            <div key={profile.id} className="flex flex-col items-start gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:gap-3">
+            <div key={profile.id} className="flex items-center gap-3 rounded-lg border p-3">
                 <div className="flex flex-1 items-center gap-3">
                     {profile.avatarUrl && (
                         <Image src={profile.avatarUrl} alt={profile.name} width={40} height={40} className="rounded-full" />
@@ -155,8 +155,8 @@ function StudentList({ students, classData }: { students: { studentId: string; p
                         <p className="text-xs text-muted-foreground">Age: {profile.age}</p>
                     </div>
                 </div>
-                <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
-                    <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-auto">
+                <div className="flex shrink-0 items-center gap-2">
+                    <Button variant="outline" size="sm" asChild>
                       <Link href={`/parent-dashboard/analytics/${profile.id}`}>View Analytics</Link>
                     </Button>
                     <Button variant="destructive" size="icon" onClick={() => handleRemoveStudent(profile)} disabled={isRemoving === profile.id}>
@@ -368,14 +368,14 @@ export default function ClassDetailsPage() {
                       {isLoadingRequests && <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>}
                       {!isLoadingRequests && joinRequests && joinRequests.length > 0 ? (
                           joinRequests.map(req => (
-                              <div key={req.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border p-3">
+                              <div key={req.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
                                   <div className="flex items-center gap-3">
                                       {req.childAvatarUrl && (
                                           <Image src={req.childAvatarUrl} alt={req.childName} width={40} height={40} className="rounded-full" />
                                       )}
                                       <p className="font-semibold">{req.childName}</p>
                                   </div>
-                                  <div className="flex items-center gap-2 self-end sm:self-center">
+                                  <div className="flex items-center gap-2">
                                       <Button size="icon" variant="outline" className="text-green-600 hover:bg-green-50 hover:text-green-700" onClick={() => handleRequest(req, 'approved')}>
                                           <Check className="h-4 w-4" />
                                       </Button>
