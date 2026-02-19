@@ -3,14 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Plus, Users, Loader2, ArrowRight, Trash2 } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Plus, Loader2, ArrowRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ClassFormDialog } from '@/components/teacher-dashboard/class-form-dialog';
 import {
@@ -171,149 +164,105 @@ export default function TeacherDashboardPage() {
   };
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">Teacher Dashboard</h2>
+    <div className="flex-1 bg-white">
+      <div className="p-4 border-b">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Classes</h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Classes</CardTitle>
-            <CardDescription>Manage your classes and students.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {isLoading && (
-                <div className="flex items-center justify-center p-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              )}
-              {!isLoading &&
-                classes &&
-                classes.map((c) => (
-                  <div
-                    key={c.id}
-                    className="flex items-center justify-between rounded-lg border bg-background p-4"
-                  >
+      <div className="flex flex-col">
+        {isLoading && (
+          <div className="flex h-64 items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {!isLoading &&
+          classes &&
+          classes.map((c) => (
+            <Link key={c.id} href={`/teacher-dashboard/class/${c.id}`} className="block border-b hover:bg-gray-50/50 transition-colors">
+                <div
+                    className="flex items-center justify-between p-4"
+                >
                     <div className="flex flex-1 items-center gap-4 min-w-0">
-                      {c.avatarUrl && (
-                        <Image
+                      {c.avatarUrl ? (
+                          <Image
                           src={c.avatarUrl}
                           alt={c.name}
-                          width={40}
-                          height={40}
+                          width={48}
+                          height={48}
                           className="rounded-full shrink-0"
-                        />
+                          />
+                      ) : (
+                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <span className="text-lg font-bold text-muted-foreground">{c.name.charAt(0)}</span>
+                        </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold truncate text-foreground">{c.name}</p>
-                        <p className="text-sm text-muted-foreground">
+                          <p className="font-semibold text-foreground text-base">{c.name}</p>
+                          <p className="text-sm text-muted-foreground">
                           {c.students?.length || 0} student(s)
-                        </p>
+                          </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-4">
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/teacher-dashboard/class/${c.id}`}>
-                          Manage <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
                       <AlertDialog>
-                        <AlertDialogTrigger asChild>
+                          <AlertDialogTrigger asChild onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
                           <Button
-                            variant="destructive"
-                            size="icon"
-                            disabled={isDeleting === c.id}
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:bg-red-100 hover:text-destructive rounded-full"
+                              disabled={isDeleting === c.id}
                           >
-                            {isDeleting === c.id ? (
+                              {isDeleting === c.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
+                              ) : (
                               <Trash2 className="h-4 w-4" />
-                            )}
+                              )}
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="light">
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="light">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>
+                              <AlertDialogTitle>
                               Are you absolutely sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
                               This will permanently delete the class "{c.name}",
                               remove all students, and delete all content
                               you've added from their feeds. This action cannot
                               be undone.
-                            </AlertDialogDescription>
+                              </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteClass(c)}
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                              onClick={(e) => {e.preventDefault(); handleDeleteClass(c)}}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
+                              >
                               Delete
-                            </AlertDialogAction>
+                              </AlertDialogAction>
                           </AlertDialogFooter>
-                        </AlertDialogContent>
+                          </AlertDialogContent>
                       </AlertDialog>
+                      <ArrowRight className="h-5 w-5 text-gray-300" />
                     </div>
-                  </div>
-                ))}
-              {!isLoading && (!classes || classes.length === 0) && (
-                <p className="py-4 text-center text-muted-foreground">
-                  You haven't created any classes yet.
-                </p>
-              )}
-              <Button
-                variant="default"
-                className="w-full"
-                onClick={() => setDialogOpen(true)}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Create New Class
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>How ZoZoKid Works for Teachers</CardTitle>
-            <CardDescription>
-              A simple guide to get you started with your classes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <div className="flex items-start gap-4">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">1</div>
-                <div>
-                    <h4 className="font-semibold">Create Your Class</h4>
-                    <p className="text-muted-foreground">Click the "Create New Class" button. Give your class a name and an avatar to get started.</p>
                 </div>
-            </div>
-            <div className="flex items-start gap-4">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">2</div>
-                <div>
-                    <h4 className="font-semibold">Share the Class Code</h4>
-                    <p className="text-muted-foreground">After clicking on the Manage class button you will be directed to your created class where you can find the list of student Join request and feed management section and their is a share button which you can click to share the class code either by copying or directly sharing to parents.</p>
-                </div>
-            </div>
-            <div className="flex items-start gap-4">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">3</div>
-                <div>
-                    <h4 className="font-semibold">Parents Enroll Their Child</h4>
-                    <p className="text-muted-foreground">Parents enter this code in their dashboard to request that their child join your class.</p>
-                </div>
-            </div>
-             <div className="flex items-start gap-4">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold">4</div>
-                <div>
-                    <h4 className="font-semibold">Approve Requests</h4>
-                    <p className="text-muted-foreground">You’ll see new join requests on the class page. Approve them to add students to your class and start sharing content!</p>
-                </div>
-            </div>
-          </CardContent>
-        </Card>
+            </Link>
+          ))}
+        {!isLoading && (!classes || classes.length === 0) && (
+          <div className="flex flex-col items-center justify-center p-16 text-center">
+            <h3 className="text-lg font-semibold">No classes yet</h3>
+            <p className="text-muted-foreground mt-1">Click the '+' button to create your first class and get started.</p>
+          </div>
+        )}
       </div>
+      
+      <Button
+        onClick={() => setDialogOpen(true)}
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
+        size="icon"
+      >
+        <Plus className="h-6 w-6 text-primary-foreground" />
+        <span className="sr-only">Create New Class</span>
+      </Button>
       <ClassFormDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
