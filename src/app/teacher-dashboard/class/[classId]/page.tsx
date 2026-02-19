@@ -14,6 +14,7 @@ import {
   X,
   Video as VideoIcon,
   Trash2,
+  Share2,
 } from 'lucide-react';
 import {
   useFirebase,
@@ -45,6 +46,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Class } from '@/app/teacher-dashboard/page';
 import type { ChildProfile } from '@/app/parent-dashboard/page';
 import { ClassContentManager } from '@/components/teacher-dashboard/class-content-manager';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 type ClassJoinRequest = {
   id: string;
@@ -264,37 +266,38 @@ export default function ClassDetailsPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <header className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-        <Button asChild variant="outline" size="icon" className="shrink-0">
-          <Link href="/teacher-dashboard">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-3">
+      <header className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+            <Button asChild variant="outline" size="icon" className="shrink-0">
+              <Link href="/teacher-dashboard">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
             {classData.avatarUrl && (
-                <Image src={classData.avatarUrl} alt={classData.name} width={48} height={48} className="rounded-full" />
+                <Image src={classData.avatarUrl} alt={classData.name} width={40} height={40} className="rounded-full hidden sm:block" />
             )}
-            <div className="flex-1">
-                <h1 className="text-xl font-bold sm:text-2xl">{classData.name}</h1>
-                <p className="text-sm text-muted-foreground">Manage your class details, students, and join requests.</p>
-            </div>
+            <h1 className="text-xl font-bold sm:text-2xl truncate">{classData.name}</h1>
         </div>
-      </header>
-      
-      <Card>
-        <CardHeader>
-            <CardTitle>Share Class Code</CardTitle>
-            <CardDescription>Parents can use this code to request to join your class from their dashboard.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <div className="flex items-center space-x-2 rounded-lg border bg-muted p-3">
-                <p className="flex-grow font-mono text-sm break-all">{classId}</p>
-                <Button size="icon" variant="ghost" onClick={copyClassCode} className="shrink-0">
-                    <ClipboardCopy className="h-5 w-5" />
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button variant="outline" className="shrink-0">
+                    <Share2 className="mr-0 h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Share Code</span>
                 </Button>
-            </div>
-        </CardContent>
-      </Card>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto light" align="end">
+                <div className="space-y-2">
+                    <p className="text-sm font-medium">Share this code with parents</p>
+                    <div className="flex items-center space-x-2 rounded-lg border bg-muted p-3">
+                        <p className="flex-grow font-mono text-lg break-all">{classId}</p>
+                        <Button size="icon" variant="ghost" onClick={copyClassCode} className="shrink-0">
+                            <ClipboardCopy className="h-5 w-5" />
+                        </Button>
+                    </div>
+                </div>
+            </PopoverContent>
+        </Popover>
+      </header>
 
       <Tabs defaultValue="students">
         <TabsList className="grid w-full grid-cols-3">
