@@ -10,7 +10,9 @@ export const metadata: Metadata = {
   description: 'A safe reels experience for kids.',
   manifest: '/manifest.json',
   themeColor: '#000000',
-  icons: null,
+  icons: {
+    icon: false,
+  },
 };
 
 export default function RootLayout({

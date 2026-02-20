@@ -78,7 +78,7 @@ export function VideoReelItem({
   const playerId = `ytplayer-${videoId}-${index}`; // Ensure player ID is unique per item
 
   // Determine if this item should have an active player
-  const isNearby = useMemo(() => Math.abs(index - activeIndex) <= 1, [index, activeIndex]);
+  const isNearby = useMemo(() => (index >= activeIndex - 1 && index <= activeIndex + 3), [index, activeIndex]);
   const isActive = useMemo(() => index === activeIndex, [index, activeIndex]);
 
   const onPlayerStateChange = (event: any) => {
