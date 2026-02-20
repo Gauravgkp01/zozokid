@@ -327,16 +327,8 @@ export default function ParentDashboardPage() {
     
   return (
     <div className="light min-h-screen bg-white font-body text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-4 bg-card p-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <ZoZoKidLogo />
-          <div>
-            <h1 className="font-bold text-foreground">
-                Welcome, {user?.email?.split('@')[0] || 'Parent'}
-            </h1>
-            <p className="text-sm text-muted-foreground">Parent Dashboard</p>
-          </div>
-        </div>
+      <header className="flex items-center justify-between bg-card p-4 shadow-sm">
+        <ZoZoKidLogo />
         <div className="flex items-center gap-2">
             <NotificationBell userType="parent" />
             <InstallPwaButton />
@@ -363,9 +355,9 @@ export default function ParentDashboardPage() {
 
       <main className="space-y-8 p-4 md:p-8">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">
-            Dashboard Overview
-          </h2>
+          <h1 className="text-3xl font-bold text-foreground">
+            Welcome, {user?.email?.split('@')[0] || 'Parent'}!
+          </h1>
           <p className="text-muted-foreground">
             Manage your children's video experience
           </p>

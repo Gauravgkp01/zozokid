@@ -11,7 +11,10 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   themeColor: '#000000',
   icons: {
-    icon: false,
+    icon: [],
+    shortcut: [],
+    apple: [],
+    other: [],
   },
 };
 
